@@ -1,14 +1,11 @@
 grammar: 
 
-regex: subexpr*; 
+regex: union*; 
 
-subexpr: 
-    | '(' subexpr ')'
-    | subexpr STAR
-    | subexpr CONCAT subexpr
-    | subexpr UNION subexpr
-    | leaf
-    ;
+union : concat (UNION concat)*; 
+concat : star (CONCAT star)*;
+star : leaf (STAR)*;
+<!-- paren : '(' star ')'; -->
 
 leaf: (LETTER | EPSILON | EMPTY_SET);
 
@@ -19,3 +16,23 @@ STAR = '*';
 LETTER = [a-zA-Z];
 EPSILON = '\e';
 EMPTY_SET = '\0'
+
+// example input
+
+(a U b)* 
+should produce:
+
+    *
+    |
+    U
+   / \
+  a   b
+
+a U b*
+should produce:
+
+    U
+   / \
+  a   *
+      |
+      b

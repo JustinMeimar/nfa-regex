@@ -9,16 +9,19 @@ class Parser {
     public: 
         std::vector<Token> tokenStream; 
         Token currentToken;
+        Token lookAhead;
 
         Parser();
         void readStream(const std::string &instream);
 
         //parser rules
         void regex();
-        void subexpr();
-        void binaryop();
-        void unaryop();
+        void paren();
+        void union_(); //avoid name conflict.
+        void concat();
+        void star();
         void leaf();
 
-        void match(Token tok); //match token at index i
+        void match(int x); //match token of type x
+        void consume();
 };

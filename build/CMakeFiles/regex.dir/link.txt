@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/regex.dir/src/main.cpp.o CMakeFiles/regex.dir/src/Node.cpp.o CMakeFiles/regex.dir/src/Parser.cpp.o -o /home/justin/nfa-regex/bin/regex 
