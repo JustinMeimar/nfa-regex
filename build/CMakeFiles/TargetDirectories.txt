@@ -1,3 +1,0 @@
-/home/justin/nfa-regex/build/CMakeFiles/regex.dir
-/home/justin/nfa-regex/build/CMakeFiles/edit_cache.dir
-/home/justin/nfa-regex/build/CMakeFiles/rebuild_cache.dir
