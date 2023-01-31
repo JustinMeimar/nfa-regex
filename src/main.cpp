@@ -1,7 +1,8 @@
 #include <iostream>
-#include "Parser.h"
 #include <memory>
 #include <vector>
+
+#include "Parser.h"
 
 int main(int argc, char** argv) {
 
@@ -14,6 +15,7 @@ int main(int argc, char** argv) {
 
     std::string input = argv[1];
     regexParser->readStream(input);
+    regexParser->regex();
 
     return 0;
 }

@@ -10,6 +10,8 @@ set (btree_src_files
     "./src/main.cpp"
     "./src/Node.cpp"
     "./src/Parser.cpp"
+    "./src/Token.cpp"
+    
 )  
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../bin)

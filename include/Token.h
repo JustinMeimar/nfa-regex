@@ -1,3 +1,5 @@
+#pragma once
+
 enum Type {
     STAR, 
     CONCAT, 
@@ -14,6 +16,9 @@ class Token {
     public:
         int charPosition;   //char position in line
         char character;     //each token is only one character in this language
-        Type type;            
-        Token() {}
+        Type type;     
+        Token(); 
+        Token(const Type END, int charPosition);
+        Token(char c, int charPosition);
+        Type recognizeType(const char c);
 };
