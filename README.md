@@ -1,11 +1,10 @@
 grammar: 
 
-regex: union*; 
-
+regex: union; 
 union : concat (UNION concat)*; 
 concat : star (CONCAT star)*;
-star : leaf (STAR)*;
-<!-- paren : '(' star ')'; -->
+star : paren (STAR)*;
+paren : leaf | '('union ')';
 
 leaf: (LETTER | EPSILON | EMPTY_SET);
 
@@ -18,8 +17,11 @@ EPSILON = '\e';
 EMPTY_SET = '\0'
 
 // example input
+0. "a U b & c" 
+ 
+0. "a & b U c"
 
-(a U b)* 
+1. (a U b)* 
 should produce:
 
     *
@@ -28,7 +30,7 @@ should produce:
    / \
   a   b
 
-a U b*
+2. a U b*
 should produce:
 
     U

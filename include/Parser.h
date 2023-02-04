@@ -4,6 +4,9 @@
 #include <memory>
 
 #include "Token.h"
+#include "Node.h"
+
+#define DEBUG 1 //debug flag
 
 class Parser {
     private:
@@ -11,12 +14,16 @@ class Parser {
     public: 
         std::vector<std::shared_ptr<Token>> tokenStream; 
         std::shared_ptr<Token> nextToken;
+        std::shared_ptr<Node> ctx = nullptr; // default start (no nodes in the parse tree yet)
+        const std::shared_ptr<Node> root = std::make_shared<Node>(); //unchanging root
         int streamIndex = 0;
 
         Parser();
         ~Parser();
 
+        //facilitate parsing & tree building
         void readStream(const std::string &instream);
+        void enterRule(std::shared_ptr<Node> rule_node);
 
         //parser rules
         void regex();

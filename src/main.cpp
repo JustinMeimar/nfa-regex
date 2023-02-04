@@ -1,7 +1,9 @@
+#pragma once
 #include <iostream>
 #include <memory>
 #include <vector>
 
+#include "Node.h"
 #include "Parser.h"
 
 int main(int argc, char** argv) {
@@ -16,6 +18,20 @@ int main(int argc, char** argv) {
     std::string input = argv[1];
     regexParser->readStream(input);
     regexParser->regex();
+
+    std::shared_ptr<Node> root = regexParser->root; 
+
+    //temporary walk in main to validate parse tree is correct:
+    std::cout << root->children.size() << std::endl;
+
+    std::shared_ptr<Node> temp = root;
+    while (temp->children.size() != 0) {
+        for (auto child : temp->children) {
+            printf("child |");
+        }
+        printf("\n");
+        temp = temp->children[0];
+    }
 
     return 0;
 }

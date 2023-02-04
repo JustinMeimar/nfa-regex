@@ -1,9 +1,15 @@
 #include "Parser.h"
 #define DEBUG 1
 
-Parser::Parser() {}
-
+Parser::Parser() { ctx = root; }
 Parser::~Parser() {}
+
+void Parser::enterRule(std::shared_ptr<Node> rule_node) {
+    //link parent node to     
+    ctx->addChild(rule_node);
+    rule_node->parent = ctx;
+    ctx = rule_node;
+}
 
 void Parser::readStream(const std::string &instream) {
     
@@ -28,17 +34,13 @@ void Parser::readStream(const std::string &instream) {
 
 void Parser::match(Type type) {
 
-    std::cout << "received match of type: " << type << std::endl;
-    if (nextToken->type = type) {
-        advance();
-    }    
-    // // create node from input buffer at index i
-    // if (currentToken.type == x) {
-    //     consume();
-    // } else {
-    //     // Throw Exception!
-    //     return;
-    // }
+    if (nextToken->type == type) {
+        std::cout << "matched " << type << std::endl;
+        advance(); 
+    } else {
+        printf("unexpected type recieved: %d, expected: %d", type, nextToken->type); 
+        exit(1);
+    }
 }
 
 void Parser::expect(Type type) {
@@ -46,75 +48,107 @@ void Parser::expect(Type type) {
 }
 
 void Parser::advance() {
-    if (streamIndex == tokenStream.size()) {
-        return;
+    if (streamIndex >= tokenStream.size()) {
+        return; 
     }
     streamIndex++;
+    nextToken = tokenStream[streamIndex];
 }
 
 void Parser::regex() {
+    #if DEBUG 
+        printf("===call regex\n");
+    #endif 
 
-    // while (currentToken.type != Type.END) {
-    //     union_();           
-    // }
+    std::shared_ptr<Node> regex_root = std::make_shared<Node>();
+    enterRule(regex_root);
     union_();
+
+    std::cout << "string succesfully parsed!\n" << std::endl;
 }
 
 void Parser::union_() {
+    #if DEBUG   
+        printf("===call union\n");
+    #endif
+
+    //link parent node to     
+    std::shared_ptr<Node> union_node = std::make_shared<Node>(RULE_UNION); 
+    enterRule(union_node);
 
     concat();
-    // // union : concat
-    // concat();
-    // // union : concat (UNION concat)* 
-    // while (currentToken.type == Type.UNION ) {
-    //     match(Type.UNION);
-    //     concat();
-    // } 
+    while (nextToken->type == UNION) {
+        union_node->addChild(std::make_shared<Node>(nextToken));
+        match(UNION);
+        ctx = union_node;
+        concat();
+    }  
 }
 
 void Parser::concat() {
+    #if DEBUG   
+        printf("===call concat\n");
+    #endif
+
+    //link child to parent and parent to child, then make ctx child.
+    std::shared_ptr<Node> concat_node = std::make_shared<Node>();
+    enterRule(concat_node);
 
     star();
-    // // concat : star
-    // star(); 
-    // // concat : star
-    // while (currentToken.type == Type.CONCAT) {
-    //     match(Type.CONCAT);
-    //     star();
-    // } 
+    while (nextToken->type == CONCAT) {
+        concat_node->addChild(std::make_shared<Node>(nextToken));
+        match(CONCAT);
+        ctx = concat_node;
+        star();
+    }
 }
 
 void Parser::star() {
+    #if DEBUG
+        printf("===call star\n");
+    #endif 
+    
+    //link child to parent and parent to child, then make ctx child.
+    std::shared_ptr<Node> star_node = std::make_shared<Node>();
+    enterRule(star_node);
 
     paren();
-    // paren();
-    // leaf();
-    // while (currentToken.type == Type.STAR) {
-    //     match(Type.STAR);
-    // }
+    while (nextToken->type == STAR){
+        star_node->addChild(std::make_shared<Node>(nextToken));
+        match(STAR);
+        ctx = star_node;
+    } 
 }
 
 void Parser::paren() {
-    if (nextToken->type == LPAREN) {
-        match(LPAREN);
+    #if DEBUG
+        printf("===call paren\n");
+    #endif
+    
+    std::shared_ptr<Node> paren_node = std::make_shared<Node>();
+    enterRule(paren_node);
+
+    if (nextToken->type == LPAREN ) {
+        while (nextToken->type == LPAREN) {
+            paren_node->addChild(std::make_shared<Node>(nextToken));
+            match(LPAREN);
+            ctx = paren_node; 
+            union_(); 
+            paren_node->addChild(std::make_shared<Node>(nextToken));
+            match(RPAREN); 
+        }
+    } else { 
         leaf();
-        expect(RPAREN); 
-    } else if (nextToken->type == LETTER){
-        match(LETTER);
-    }
-    return;
+    } 
 }
 
-void Parser::leaf() {
+void Parser::leaf() { 
+    #if DEBUG
+        printf("===call leaf\n");
+    #endif
+    
+    std::shared_ptr<Node> leaf_node = std::make_shared<Node>(nextToken);
+    enterRule(leaf_node);
 
     match(LETTER);
-
-    //eventually add support for terminals other than letter...
-
-    // int leafType = currentToken.type;
-    // switch(leafType) {
-    //     case Type.LETTER: match(Type.LETER); break;
-    //     case Type.EPSILON: match(Type.EPSILON); break;
-    //     case Type.EMPTY_SET: match(Type.EMPTY_SET); break;
-    // }
 }
