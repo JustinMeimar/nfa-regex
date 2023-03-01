@@ -5,6 +5,7 @@
 
 #include "Node.h"
 #include "Parser.h"
+#include "NFA.h"
 
 int main(int argc, char** argv) {
 
@@ -25,13 +26,9 @@ int main(int argc, char** argv) {
     std::cout << root->children.size() << std::endl;
 
     std::shared_ptr<Node> temp = root;
-    while (temp->children.size() != 0) {
-        for (auto child : temp->children) {
-            printf("child |");
-        }
-        printf("\n");
-        temp = temp->children[0];
-    }
+    
+    std::shared_ptr<NFA> nfa = std::make_shared<NFA>();
+    nfa->constructFromDFS(root); 
 
     return 0;
 }

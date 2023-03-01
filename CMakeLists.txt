@@ -11,6 +11,7 @@ set (btree_src_files
     "./src/Node.cpp"
     "./src/Parser.cpp"
     "./src/Token.cpp"  
+    "./src/NFA.cpp"  
 )  
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../bin)

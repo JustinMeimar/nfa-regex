@@ -1,5 +1,4 @@
 #include "Parser.h"
-#define DEBUG 1
 
 Parser::Parser() { ctx = root; }
 Parser::~Parser() {}
@@ -60,11 +59,16 @@ void Parser::regex() {
         printf("===call regex\n");
     #endif 
 
-    std::shared_ptr<Node> regex_root = std::make_shared<Node>();
+    std::shared_ptr<Node> regex_root = std::make_shared<Node>(RULE_REGEX);
     enterRule(regex_root);
-    union_();
+    
+    while(this->nextToken->type != Type::END) {
+        ctx = regex_root; 
+        union_();
+    }
 
     std::cout << "string succesfully parsed!\n" << std::endl;
+
 }
 
 void Parser::union_() {
@@ -91,7 +95,7 @@ void Parser::concat() {
     #endif
 
     //link child to parent and parent to child, then make ctx child.
-    std::shared_ptr<Node> concat_node = std::make_shared<Node>();
+    std::shared_ptr<Node> concat_node = std::make_shared<Node>(RULE_CONCAT);
     enterRule(concat_node);
 
     star();
@@ -109,7 +113,7 @@ void Parser::star() {
     #endif 
     
     //link child to parent and parent to child, then make ctx child.
-    std::shared_ptr<Node> star_node = std::make_shared<Node>();
+    std::shared_ptr<Node> star_node = std::make_shared<Node>(RULE_STAR);
     enterRule(star_node);
 
     paren();
@@ -125,7 +129,7 @@ void Parser::paren() {
         printf("===call paren\n");
     #endif
     
-    std::shared_ptr<Node> paren_node = std::make_shared<Node>();
+    std::shared_ptr<Node> paren_node = std::make_shared<Node>(RULE_PAREN);
     enterRule(paren_node);
 
     if (nextToken->type == LPAREN ) {
@@ -146,7 +150,8 @@ void Parser::leaf() {
     #if DEBUG
         printf("===call leaf\n");
     #endif
-    
+
+    std::cout << "token we are assigning into the node: " << nextToken << std::endl; 
     std::shared_ptr<Node> leaf_node = std::make_shared<Node>(nextToken);
     enterRule(leaf_node);
 
