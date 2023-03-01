@@ -5,12 +5,12 @@
 #include <memory>
 #include <set>
 
+#include "Token.h"
 #include "Node.h"
+#include "Rules.h"
 
 class NFA {
     public:
-        NFA() {}
-
-        // Construct the NFA from a depth first traversal of the Parse Tree 
-        void constructFromDFS(std::shared_ptr<Node> node);
+        NFA(ParserRule rule, std::shared_ptr<Token> token);
+        NFA(ParserRule rule, std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs);     
 };

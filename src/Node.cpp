@@ -8,7 +8,7 @@ Node::Node(ParserRule rule) {
 
 Node::Node(std::shared_ptr<Token> token) { 
     this->token = token; 
-    std::cout << this->token << this << std::endl;
+    this->rule = RULE_LEAF;
 }
 
 void Node::addChild(std::shared_ptr<Node> child) {
