@@ -3,7 +3,9 @@
 void Visitor::visit(std::shared_ptr<Node> node) {
 
     switch(node->rule) {
-        
+        case RULE_ROOT:
+            visitRoot(node);
+            break;
         case RULE_REGEX:
             visitRegex(node); 
             break;
@@ -21,8 +23,8 @@ void Visitor::visit(std::shared_ptr<Node> node) {
             break;
         case RULE_LEAF:
             visitLeaf(node);
-            break;
-        default:
+            break; 
+        default: 
             break;
     }
 
@@ -51,14 +53,30 @@ void Visitor::visitChildren(std::shared_ptr<Node> node) {
     return;
 }
 
-void Visitor::visitRegex(std::shared_ptr<Node> node) {
+void Visitor::visitRoot(std::shared_ptr<Node> node) {
+ 
+    // Visit the entire tree 
+    visitChildren(node);
 
+    // Then save the final NFA 
+    this->nfa = expr_stack.top(); 
+    expr_stack.pop(); 
+    
+    return;
+}
+
+void Visitor::visitRegex(std::shared_ptr<Node> node) {
+    #if DEBUG
+        std::cout << "Visit Regex" << std::endl;
+    #endif 
     visitChildren(node);   
     return;
 }
 
 void Visitor::visitUnion(std::shared_ptr<Node> node) {
-
+    #if DEBUG
+        std::cout << "Visit Union" << std::endl;
+    #endif 
     if (node->children.size() == 3) {
         // Visit LHS and RHS child nodes       
         visit(node->children[0]); 
@@ -72,7 +90,9 @@ void Visitor::visitUnion(std::shared_ptr<Node> node) {
 }
 
 void Visitor::visitConcat(std::shared_ptr<Node> node) {
-    
+    #if DEBUG
+        std::cout << "Visit Concat" << std::endl;
+    #endif 
     if (node->children.size() == 3) {
         // Visit LHS and RHS child nodes       
         visit(node->children[0]); 
@@ -86,6 +106,9 @@ void Visitor::visitConcat(std::shared_ptr<Node> node) {
 }
 
 void Visitor::visitStar(std::shared_ptr<Node> node) {
+    #if DEBUG
+        std::cout << "Visit Star" << std::endl;
+    #endif 
     
     //TODO: think about star more  
     if (node->children.size() == 2) {
@@ -101,13 +124,18 @@ void Visitor::visitStar(std::shared_ptr<Node> node) {
 }
 
 void Visitor::visitParen(std::shared_ptr<Node> node) {
-   
+   #if DEBUG
+        std::cout << "Visit Paren" << std::endl;
+    #endif 
     visitChildren(node);
     return;   
 }
 
 void Visitor::visitLeaf(std::shared_ptr<Node> node) {
- 
+
+    #if DEBUG
+        std::cout << "Visit Leaf" << std::endl;
+    #endif 
     std::shared_ptr<NFA> atomicNFA = std::make_shared<NFA>(RULE_LEAF, node->token);
     expr_stack.push(atomicNFA);
 

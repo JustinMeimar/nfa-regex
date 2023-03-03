@@ -18,7 +18,8 @@ enum ParserRule {
     RULE_CONCAT, 
     RULE_STAR,
     RULE_PAREN, 
-    RULE_LEAF
+    RULE_LEAF,
+    RULE_ROOT
 };
 
 #endif

@@ -15,7 +15,7 @@ class Parser {
         std::vector<std::shared_ptr<Token>> tokenStream; 
         std::shared_ptr<Token> nextToken;
         std::shared_ptr<Node> ctx = nullptr; // default start (no nodes in the parse tree yet)
-        const std::shared_ptr<Node> root = std::make_shared<Node>(); //unchanging root
+        std::shared_ptr<Node> root; 
         int streamIndex = 0;
 
         Parser();

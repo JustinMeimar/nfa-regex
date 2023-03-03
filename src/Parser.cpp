@@ -1,10 +1,10 @@
 #include "Parser.h"
 
-Parser::Parser() { ctx = root; }
+Parser::Parser() { root = std::make_shared<Node>(RULE_ROOT); ctx = root; }
 Parser::~Parser() {}
 
 void Parser::enterRule(std::shared_ptr<Node> rule_node) {
-    //link parent node to     
+    //link parent node to new rule node   
     ctx->addChild(rule_node);
     rule_node->parent = ctx;
     ctx = rule_node;
