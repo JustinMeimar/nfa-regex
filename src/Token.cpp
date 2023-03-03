@@ -28,5 +28,4 @@ Type Token::recognizeType(char c) {
     else                {type = LETTER;}
 
     return type;
-
 }

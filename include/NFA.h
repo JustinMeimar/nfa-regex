@@ -11,6 +11,13 @@
 #include "Rules.h"
 #include "State.h"
 
+#ifndef EPSILON_H
+#define EPSILON_H
+
+#define EPSILON '\xCE' //Unicode character for epsilon 
+
+#endif
+
 class NFA {
     public:
         NFA(ParserRule rule, std::shared_ptr<Token> token);
@@ -24,7 +31,10 @@ class NFA {
 
         //construct NFA:
         void addTransition(std::shared_ptr<State> q1, std::shared_ptr<State> q2, const char sigma); //add a transitino from (q1, sigma)  > q2
-
+        void constructFromUnion(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs);
+        void constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs);
+        void constructFromStar(std::shared_ptr<NFA> lhs);
+       
         //execution:
         void execute(const std::string &string);
 

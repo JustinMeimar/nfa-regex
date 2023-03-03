@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     visitor->visit(root);
 
     std::shared_ptr<NFA> nfa = visitor->nfa;
-    nfa->execute(string);
+    // nfa->execute(string);
 
     return 0;
 }
