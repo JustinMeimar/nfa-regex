@@ -14,30 +14,47 @@ NFA::NFA(ParserRule rule, std::shared_ptr<Token> token) {
 // New NFA as a composition of two smaller NFA and a parse rule to join them.
 NFA::NFA(ParserRule rule, std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) {
 
-    std::cout << "MAKE NFA" << rule << std::endl;
     switch(rule) {
-        case RULE_CONCAT:
+        case RULE_UNION:
             constructFromUnion(lhs, rhs); 
             break;
+        case RULE_CONCAT:
+            constructFromConcat(lhs, rhs);
+            break; 
+        case RULE_STAR:
+            constructFromStar(lhs);
     }
 
 }     
 
 void NFA::constructFromUnion(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) {
     // Create new start state 
-    std::shared_ptr<State> start_state = std::make_shared<State>(REJECT);
-
+    std::shared_ptr<State> new_start_state = std::make_shared<State>(REJECT);
+    this->startState = new_start_state;
     this->transition_table = lhs->transition_table;
-    for (
-        std::map<std::tuple<std::shared_ptr<State>, const char>, std::shared_ptr<State>>::iterator it = rhs->transition_table.begin();
-        it != rhs->transition_table.end();
-        it++
-    )  {
 
-        std::tuple<std::shared_ptr<State>, const char> key = it->first;
-        std::shared_ptr<State> q1 = std::get<0>(key);
-        std::cout << q1 << std::endl;
+    for ( TransitionTable::iterator it = rhs->transition_table.begin(); it != rhs->transition_table.end(); it++) { // for body
+
+        // Get key and value
+        TransitionTuple key = it->first;
+        std::shared_ptr<State> value = it->second;
+
+        #if DEBUG 
+            std::shared_ptr<State> q1 = std::get<0>(key);
+            const char sigma = std::get<1>(key);
+            std::cout << q1->type << std::endl;
+            std::cout << sigma << std::endl;
+        #endif
+
+        this->transition_table.insert(
+            {key, value} 
+        );
     }
+
+    std::cout << this->transition_table.size() << std::endl;
+    addTransition(startState, lhs->startState, EPSILON);
+    addTransition(startState, rhs->startState, EPSILON);
+    std::cout << this->transition_table.size() << std::endl;
 }
 
 void NFA::constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) {
@@ -51,7 +68,14 @@ void NFA::constructFromStar(std::shared_ptr<NFA> lhs) {
 void NFA::addTransition(std::shared_ptr<State> q1, std::shared_ptr<State> q2, const char sigma) {
 
     // (state, symbol) -> state
-    std::tuple<std::shared_ptr<State>, const char> transition_tuple = {q1, sigma};  
+    TransitionTuple transition_tuple = {q1, sigma};  
+
+    #if DEBUG 
+        if (transition_table[transition_tuple] != nullptr) {
+            std::cout << "This already exists" << std::endl;
+        }
+    #endif
+
     this->transition_table.insert({transition_tuple, q2});
 }
 
@@ -59,8 +83,6 @@ void NFA::execute(const std::string &string) {
     
     unsigned int input_pointer = 0;
     std::shared_ptr<State> current_state = startState;
-
-    std::cout << transition_table.size();
     const char c = string.at(0);
     
     for (const char c: string) { 
@@ -83,6 +105,18 @@ void NFA::execute(const std::string &string) {
         std::cout << "String Rejects!" << std::endl;
     }
 
+    return; 
+}
+
+void NFA::printTransitionTable() {
+    for ( TransitionTable::iterator it = transition_table.begin(); it != transition_table.end(); it++) {
+        // Get key and value
+        TransitionTuple key = it->first;
+        std::shared_ptr<State> q2 = it->second;
+            
+        std::shared_ptr<State> q1 = std::get<0>(key);
+        const char sigma = std::get<1>(key);
+        std::cout << "(" << q1 << ", "<< sigma << ") =>" << q2 << std::endl;
+    }
     return;
-    
 }
