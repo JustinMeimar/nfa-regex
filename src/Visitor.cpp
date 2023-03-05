@@ -58,6 +58,10 @@ void Visitor::visitRoot(std::shared_ptr<Node> node) {
     // Visit the entire tree 
     visitChildren(node);
 
+    #if DEBUG
+        std::cout << expr_stack.size() << std::endl;
+    #endif
+
     // Then save the final NFA 
     this->nfa = expr_stack.top(); 
     expr_stack.pop(); 
@@ -134,7 +138,7 @@ void Visitor::visitParen(std::shared_ptr<Node> node) {
 void Visitor::visitLeaf(std::shared_ptr<Node> node) {
 
     #if DEBUG
-        std::cout << "Visit Leaf" << std::endl;
+        std::cout << "Visit Leaf: " << node->token->character << std::endl;
     #endif 
     std::shared_ptr<NFA> atomicNFA = std::make_shared<NFA>(RULE_LEAF, node->token);
     expr_stack.push(atomicNFA);

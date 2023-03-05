@@ -24,99 +24,112 @@ NFA::NFA(ParserRule rule, std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) {
         case RULE_STAR:
             constructFromStar(lhs);
     }
-
 }     
 
 void NFA::constructFromUnion(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) {
-    // Create new start state 
+    // Create new start state  
     std::shared_ptr<State> new_start_state = std::make_shared<State>(REJECT);
     this->startState = new_start_state;
     this->transition_table = lhs->transition_table;
+    
+    #if DEBUG_NFA
+        std::cout << "== Construct from union == " << std::endl;
+    #endif
 
     for ( TransitionTable::iterator it = rhs->transition_table.begin(); it != rhs->transition_table.end(); it++) { // for body
 
-        // Get key and value
-        TransitionTuple key = it->first;
-        std::shared_ptr<State> value = it->second;
-
-        #if DEBUG 
-            std::shared_ptr<State> q1 = std::get<0>(key);
-            const char sigma = std::get<1>(key);
-            std::cout << q1->type << std::endl;
-            std::cout << sigma << std::endl;
-        #endif
-
-        this->transition_table.insert(
-            {key, value} 
-        );
+        TransitionTuple transition_tuple = *it;
+        std::shared_ptr<State> current_state = std::get<0>(transition_tuple);
+        std::shared_ptr<State> next_state = std::get<2>(transition_tuple);
+        const char sigma = std::get<1>(transition_tuple);
+        this->transition_table.insert(*it);
     }
 
-    std::cout << this->transition_table.size() << std::endl;
+    // std::cout << this->transition_table.size() << std::endl;
     addTransition(startState, lhs->startState, EPSILON);
     addTransition(startState, rhs->startState, EPSILON);
-    std::cout << this->transition_table.size() << std::endl;
+    // std::cout << this->transition_table.size() << std::endl;
 }
 
-void NFA::constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) {
+void NFA::constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) {}
 
-}
-
-void NFA::constructFromStar(std::shared_ptr<NFA> lhs) {
-
-}
+void NFA::constructFromStar(std::shared_ptr<NFA> lhs) {}
 
 void NFA::addTransition(std::shared_ptr<State> q1, std::shared_ptr<State> q2, const char sigma) {
-
-    // (state, symbol) -> state
-    TransitionTuple transition_tuple = {q1, sigma};  
-
-    #if DEBUG 
-        if (transition_table[transition_tuple] != nullptr) {
-            std::cout << "This already exists" << std::endl;
-        }
+    
+    TransitionTuple transition_tuple = {q1, sigma, q2};  
+    
+    #if DEBUG_NFA
     #endif
 
-    this->transition_table.insert({transition_tuple, q2});
+    transition_table.insert(transition_tuple);
 }
 
-void NFA::execute(const std::string &string) {
+std::set<TransitionTuple> NFA::computeAvailableTransitions(std::shared_ptr<State> current_state, char c) {
     
-    unsigned int input_pointer = 0;
-    std::shared_ptr<State> current_state = startState;
-    const char c = string.at(0);
-    
-    for (const char c: string) { 
-        std::shared_ptr<State> next_state = transition_table[{current_state, c}];
-        if (next_state != nullptr) {
-            // There is a valid transition
-            current_state = next_state;
-            if (c != EPSILON) {
-                input_pointer++;
+    std::set<TransitionTuple> available_transitions; 
+    for (TransitionTable::iterator it = transition_table.begin(); it != transition_table.end(); it++) { // for body
+
+        TransitionTuple transition_tuple = *it;
+
+        std::shared_ptr<State> q1 = std::get<0>(transition_tuple);
+        std::shared_ptr<State> q2 = std::get<2>(transition_tuple);
+        const char sigma = std::get<1>(transition_tuple);
+
+        if (current_state == q1 && (c == sigma || sigma == EPSILON)) {
+            available_transitions.insert( *it ); 
+        }  
+    }
+
+    return available_transitions;
+}
+
+void NFA::execute(std::shared_ptr<State> current_state, const std::string &string, unsigned int input_pointer) {
+
+    char c = string.at(input_pointer);
+    std::set<TransitionTuple> available_transitions = computeAvailableTransitions(current_state, c);  
+
+    #if DEBUG_NFA
+        std::cout << "==== EXECUTE ====" << std::endl;
+        std::cout << "Current State: " << current_state << std::endl;
+        std::cout << "String: " << string << std::endl;
+        std::cout << "input pointer: " << input_pointer << std::endl;
+        std::cout << available_transitions.size() << std::endl;
+    #endif
+
+    if (available_transitions.size() == 0) {
+        std::cout << "crash" << std::endl; 
+        return;
+    }
+
+    for (auto transition : available_transitions) {
+        int next_input_pointer = input_pointer;
+        std::shared_ptr<State> q2 = std::get<2>(transition);
+        
+        if (input_pointer == string.size() -1) {
+            // we are at the end of the input string
+            if (current_state->type == ACCEPT) {
+                accept = true;
+            } else {
+                accept = false;
             }
-        } else {
             break;
         }
-    }
-
-    if (current_state->type == ACCEPT && input_pointer == string.size()) {
-        std::cout << "String Accepts!" << std::endl;
-    } else {
-        std::cout << "String Size: " << string.size() << "Current Input:" << input_pointer << std::endl; 
-        std::cout << "String Rejects!" << std::endl;
-    }
-
+        // only increment the input pointer for non-epsilon symbol consumptions.
+        if (std::get<1>(transition) != EPSILON) {
+            next_input_pointer++;
+        }
+        // recursively execute all possible NFA derivations.
+        execute(q2, string, next_input_pointer); 
+    }    
     return; 
 }
 
 void NFA::printTransitionTable() {
     for ( TransitionTable::iterator it = transition_table.begin(); it != transition_table.end(); it++) {
         // Get key and value
-        TransitionTuple key = it->first;
-        std::shared_ptr<State> q2 = it->second;
-            
-        std::shared_ptr<State> q1 = std::get<0>(key);
-        const char sigma = std::get<1>(key);
-        std::cout << "(" << q1 << ", "<< sigma << ") =>" << q2 << std::endl;
+        TransitionTuple transition_tuple = *it;
+        std::cout << "==Transition Function: " << "(" << std::get<0>(*it) << ", " << std::get<1>(*it) << ") => " << std::get<2>(*it) << std::endl;
     }
     return;
 }
