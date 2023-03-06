@@ -27,18 +27,21 @@ int main(int argc, char** argv) {
     regexParser->regex();
 
     std::shared_ptr<Node> root = regexParser->root; 
+
     std::shared_ptr<Visitor> visitor = std::make_shared<Visitor>(); 
     visitor->visit(root);
 
-    // std::shared_ptr<NFA> nfa = visitor->nfa;
-    // nfa->printTransitionTable(); 
-    // nfa->execute(nfa->startState, string, 0);
+    std::shared_ptr<NFA> nfa = visitor->nfa;
+    nfa->printTransitionTable(); 
+    std::cout << "before: " << nfa->accept << std::endl;
+    nfa->execute(nfa->startState, string, 0);
+    std::cout << "after: " << nfa->accept << std::endl;
 
-    // if (nfa->accept) {
-        // std::cout << "Accept String :D" << std::endl;
-    // } else {
-        // std::cout << "Reject String :(" << std::endl;
-    // }
+    if (nfa->accept) {
+        std::cout << "Accept String :D" << std::endl;
+    } else {
+        std::cout << "Reject String :(" << std::endl;
+    }
 
     return 0;
 }

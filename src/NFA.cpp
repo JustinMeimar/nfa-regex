@@ -1,7 +1,7 @@
 #include "NFA.h"
 
 // Atomic NFA constructor
-NFA::NFA(ParserRule rule, std::shared_ptr<Token> token) {
+NFA::NFA(ParserRule rule, std::shared_ptr<Token> token) : accept(false) {
     std::shared_ptr<State> startState = std::make_shared<State>(REJECT);
     std::shared_ptr<State> acceptState = std::make_shared<State>(ACCEPT);
     
@@ -12,7 +12,7 @@ NFA::NFA(ParserRule rule, std::shared_ptr<Token> token) {
 }
 
 // New NFA as a composition of two smaller NFA and a parse rule to join them.
-NFA::NFA(ParserRule rule, std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) {
+NFA::NFA(ParserRule rule, std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) : accept(false) {
 
     switch(rule) {
         case RULE_UNION:
@@ -86,6 +86,13 @@ std::set<TransitionTuple> NFA::computeAvailableTransitions(std::shared_ptr<State
 
 void NFA::execute(std::shared_ptr<State> current_state, const std::string &string, unsigned int input_pointer) {
 
+    // Check if we are in an accept state and have consumed all tokens.
+    if (input_pointer == string.size() && current_state->type == ACCEPT) {
+        // we are at the end of the input string
+        accept = true;
+        return; 
+    }
+    
     char c = string.at(input_pointer);
     std::set<TransitionTuple> available_transitions = computeAvailableTransitions(current_state, c);  
 
@@ -94,31 +101,24 @@ void NFA::execute(std::shared_ptr<State> current_state, const std::string &strin
         std::cout << "Current State: " << current_state << std::endl;
         std::cout << "String: " << string << std::endl;
         std::cout << "input pointer: " << input_pointer << std::endl;
-        std::cout << available_transitions.size() << std::endl;
+        std::cout << "number of available transitions: " << available_transitions.size() << std::endl;
     #endif
 
+    // 
     if (available_transitions.size() == 0) {
-        std::cout << "crash" << std::endl; 
         return;
     }
 
+    // execute in parallel for each available transition 
     for (auto transition : available_transitions) {
         int next_input_pointer = input_pointer;
         std::shared_ptr<State> q2 = std::get<2>(transition);
         
-        if (input_pointer == string.size() -1) {
-            // we are at the end of the input string
-            if (current_state->type == ACCEPT) {
-                accept = true;
-            } else {
-                accept = false;
-            }
-            break;
-        }
         // only increment the input pointer for non-epsilon symbol consumptions.
         if (std::get<1>(transition) != EPSILON) {
             next_input_pointer++;
         }
+
         // recursively execute all possible NFA derivations.
         execute(q2, string, next_input_pointer); 
     }    

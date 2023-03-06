@@ -26,7 +26,6 @@ void Parser::readStream(const std::string &instream) {
             << tokenStream[charPosition]->character << std::endl;
         #endif DEBUG 
     }
-
     tokenStream.push_back(std::make_shared<Token>(END, tokenStream.size()));
     nextToken = tokenStream[0]; //assign next token to first in stream
 }
@@ -85,7 +84,7 @@ void Parser::union_() {
         union_node->addChild(std::make_shared<Node>(nextToken));
         match(UNION);
         ctx = union_node;
-        concat();
+        union_();
     }  
 }
 
@@ -103,7 +102,7 @@ void Parser::concat() {
         concat_node->addChild(std::make_shared<Node>(nextToken));
         match(CONCAT);
         ctx = concat_node;
-        star();
+        concat();
     }
 }
 
