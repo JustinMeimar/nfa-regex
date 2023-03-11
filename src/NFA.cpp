@@ -2,6 +2,11 @@
 
 // Atomic NFA constructor
 NFA::NFA(ParserRule rule, std::shared_ptr<Token> token) : accept(false) {
+
+    #if DEBUG_NFA
+        std::cout << "Construct from leaf: " << token->character << std::endl;
+    #endif
+
     std::shared_ptr<State> startState = std::make_shared<State>(REJECT);
     std::shared_ptr<State> acceptState = std::make_shared<State>(ACCEPT);
     
@@ -26,32 +31,55 @@ NFA::NFA(ParserRule rule, std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) : 
     }
 }     
 
+void NFA::copyTransitions(TransitionTable *src, TransitionTable *dest) {
+    for ( TransitionTable::iterator it = src->begin(); it != src->end(); it++) { 
+        dest->insert(*it);
+    }
+}
+
+StateSet NFA::unionStates(StateSet lhs, StateSet rhs) {
+    
+    StateSet join_states(lhs);
+
+    for (StateSet::iterator it = rhs.begin(); it != rhs.end(); it++) {
+        join_states.insert(*it);
+    }
+
+    return join_states;
+}
+
 void NFA::constructFromUnion(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) {
     // Create new start state  
     std::shared_ptr<State> new_start_state = std::make_shared<State>(REJECT);
     this->startState = new_start_state;
     this->transition_table = lhs->transition_table;
-    
+    this->acceptStates = unionStates(lhs->acceptStates, rhs->acceptStates);
+
     #if DEBUG_NFA
         std::cout << "== Construct from union == " << std::endl;
     #endif
 
-    for ( TransitionTable::iterator it = rhs->transition_table.begin(); it != rhs->transition_table.end(); it++) { // for body
+    copyTransitions(&rhs->transition_table, &transition_table); 
 
-        TransitionTuple transition_tuple = *it;
-        std::shared_ptr<State> current_state = std::get<0>(transition_tuple);
-        std::shared_ptr<State> next_state = std::get<2>(transition_tuple);
-        const char sigma = std::get<1>(transition_tuple);
-        this->transition_table.insert(*it);
-    }
-
-    // std::cout << this->transition_table.size() << std::endl;
     addTransition(startState, lhs->startState, EPSILON);
     addTransition(startState, rhs->startState, EPSILON);
-    // std::cout << this->transition_table.size() << std::endl;
 }
 
-void NFA::constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) {}
+void NFA::constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) {
+
+    this->transition_table = lhs->transition_table;
+    this->startState = lhs->startState;
+    this->acceptStates = rhs->acceptStates;
+
+    copyTransitions(&rhs->transition_table, &transition_table);
+
+    std::shared_ptr<State> rhs_start = rhs->startState;
+    for (auto state : lhs->acceptStates) {
+        std::cout << "ADD LINK " << state << " -> " << rhs_start;
+        state->type = REJECT;
+        addTransition(state, rhs_start, EPSILON);        
+    }
+}
 
 void NFA::constructFromStar(std::shared_ptr<NFA> lhs) {}
 
@@ -97,14 +125,12 @@ void NFA::execute(std::shared_ptr<State> current_state, const std::string &strin
     std::set<TransitionTuple> available_transitions = computeAvailableTransitions(current_state, c);  
 
     #if DEBUG_NFA
-        std::cout << "==== EXECUTE ====" << std::endl;
-        std::cout << "Current State: " << current_state << std::endl;
-        std::cout << "String: " << string << std::endl;
-        std::cout << "input pointer: " << input_pointer << std::endl;
+        std::cout << "==== EXECUTE ====" << std::endl; std::cout << "Current State: " << current_state << std::endl;
+        std::cout << "String: " << string << std::endl; std::cout << "input pointer: " << input_pointer << std::endl; 
         std::cout << "number of available transitions: " << available_transitions.size() << std::endl;
     #endif
 
-    // 
+    //crash the  
     if (available_transitions.size() == 0) {
         return;
     }

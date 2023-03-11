@@ -5,6 +5,7 @@
 #include <memory>
 #include <set>
 #include <tuple>
+#include <algorithm>
 
 #include "Token.h"
 #include "Node.h"
@@ -19,6 +20,7 @@
 
 typedef std::tuple<std::shared_ptr<State>, const char, std::shared_ptr<State>> TransitionTuple;
 typedef std::set<TransitionTuple> TransitionTable;
+typedef std::set<std::shared_ptr<State>> StateSet;
 
 class NFA {
     public:
@@ -26,8 +28,8 @@ class NFA {
         NFA(ParserRule rule, std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs);     
 
         // NFA N = (Q, E, s, delta, F);
-        std::set<std::shared_ptr<State>> states; // Q
-        std::set<std::shared_ptr<State>> acceptStates; // F
+        StateSet states; // Q
+        StateSet acceptStates; // F
         std::shared_ptr<State> startState; // s
         TransitionTable transition_table; 
         bool accept; // flipped to true if a path 
@@ -45,5 +47,7 @@ class NFA {
         void printTransitionTable();
 
     private: 
+        void copyTransitions(TransitionTable *src, TransitionTable *dest);
+        StateSet unionStates(StateSet lhs, StateSet rhs);
         std::set<TransitionTuple> computeAvailableTransitions(std::shared_ptr<State> current_state, char c);
 };
