@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     } else if (argc >= 2) {
         regex = argv[1]; //regex specification
     } if (argc == 3) {
-        string = argv[2]; //string to run on RE
+        string = argv[2]; //string to run on RE 
     } 
 
     regexParser->readStream(regex);
@@ -32,7 +32,6 @@ int main(int argc, char** argv) {
     visitor->visit(root);
 
     std::shared_ptr<NFA> nfa = visitor->nfa;
-    nfa->printTransitionTable(); 
     nfa->execute(nfa->startState, string, 0);
 
     if (nfa->accept) {

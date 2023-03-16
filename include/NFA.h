@@ -6,6 +6,7 @@
 #include <set>
 #include <tuple>
 #include <algorithm>
+#include <queue>
 
 #include "Token.h"
 #include "Node.h"
@@ -21,11 +22,13 @@
 typedef std::tuple<std::shared_ptr<State>, const char, std::shared_ptr<State>> TransitionTuple;
 typedef std::set<TransitionTuple> TransitionTable;
 typedef std::set<std::shared_ptr<State>> StateSet;
+typedef std::tuple<std::shared_ptr<State>, unsigned int> ExecutionConfig;
 
 class NFA {
     public:
         NFA(ParserRule rule, std::shared_ptr<Token> token);
         NFA(ParserRule rule, std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs);     
+        NFA(ParserRule rule, std::shared_ptr<NFA> nfa); //for unary operator star
 
         // NFA N = (Q, E, s, delta, F);
         StateSet states; // Q
@@ -41,10 +44,11 @@ class NFA {
         void constructFromStar(std::shared_ptr<NFA> lhs);
 
         //execution:
-        void execute(std::shared_ptr<State> current_state, const std::string &string, unsigned int input_pointer);
+        void execute(std::shared_ptr<State> start_state, const std::string &string, unsigned int input_pointer);
 
-        //helper
-        void printTransitionTable();
+        //helper 
+        void computeComplement();
+        void printTransitionTable(TransitionTable transition_table);
 
     private: 
         void copyTransitions(TransitionTable *src, TransitionTable *dest);
