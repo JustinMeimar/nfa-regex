@@ -6,7 +6,7 @@ enum Type {
     UNION, 
     LPAREN,
     RPAREN,
-    LETTER, 
+    LETTER,
     EPSILON,
     EMPTY_SET,
     END

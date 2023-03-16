@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     } else if (argc >= 2) {
         regex = argv[1]; //regex specification
     } if (argc == 3) {
-        string = argv[2]; //string to run on RE
+        string = argv[2]; //string to run on RE 
     } 
 
     regexParser->readStream(regex);
@@ -32,10 +32,11 @@ int main(int argc, char** argv) {
     visitor->visit(root);
 
     std::shared_ptr<NFA> nfa = visitor->nfa;
-    nfa->printTransitionTable(); 
-    std::cout << "before: " << nfa->accept << std::endl;
+    nfa->printTransitionTable(nfa->transition_table); 
+
+    // std::cout << "before: " << nfa->accept << std::endl;
     nfa->execute(nfa->startState, string, 0);
-    std::cout << "after: " << nfa->accept << std::endl;
+    // std::cout << "after: " << nfa->accept << std::endl;
 
     if (nfa->accept) {
         std::cout << "Accept String :D" << std::endl;

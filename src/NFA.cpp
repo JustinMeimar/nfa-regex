@@ -45,10 +45,8 @@ void NFA::constructFromUnion(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs)
         this->transition_table.insert(*it);
     }
 
-    // std::cout << this->transition_table.size() << std::endl;
     addTransition(startState, lhs->startState, EPSILON);
     addTransition(startState, rhs->startState, EPSILON);
-    // std::cout << this->transition_table.size() << std::endl;
 }
 
 void NFA::constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) {}
@@ -65,13 +63,13 @@ void NFA::addTransition(std::shared_ptr<State> q1, std::shared_ptr<State> q2, co
     transition_table.insert(transition_tuple);
 }
 
-std::set<TransitionTuple> NFA::computeAvailableTransitions(std::shared_ptr<State> current_state, char c) {
+TransitionTable NFA::computeAvailableTransitions(std::shared_ptr<State> current_state, char c) {
     
-    std::set<TransitionTuple> available_transitions; 
+    TransitionTable available_transitions = {}; 
+    
     for (TransitionTable::iterator it = transition_table.begin(); it != transition_table.end(); it++) { // for body
 
         TransitionTuple transition_tuple = *it;
-
         std::shared_ptr<State> q1 = std::get<0>(transition_tuple);
         std::shared_ptr<State> q2 = std::get<2>(transition_tuple);
         const char sigma = std::get<1>(transition_tuple);
@@ -84,48 +82,83 @@ std::set<TransitionTuple> NFA::computeAvailableTransitions(std::shared_ptr<State
     return available_transitions;
 }
 
-void NFA::execute(std::shared_ptr<State> current_state, const std::string &string, unsigned int input_pointer) {
+/* Compute a breadth first execution path on the NFA. At a given state all available transitions
+are collected, then each transition executes on a separate thread. 
+*/
+void NFA::execute(std::shared_ptr<State> start_state, const std::string &string, unsigned int input_pointer) {
 
-    // Check if we are in an accept state and have consumed all tokens.
-    if (input_pointer == string.size() && current_state->type == ACCEPT) {
-        // we are at the end of the input string
-        accept = true;
-        return; 
-    }
+    std::queue<ExecutionConfig> bfsQueue;
+    bfsQueue.push({start_state, input_pointer});
     
-    char c = string.at(input_pointer);
-    std::set<TransitionTuple> available_transitions = computeAvailableTransitions(current_state, c);  
+    while (bfsQueue.size() != 0) {
 
-    #if DEBUG_NFA
-        std::cout << "==== EXECUTE ====" << std::endl;
-        std::cout << "Current State: " << current_state << std::endl;
-        std::cout << "String: " << string << std::endl;
-        std::cout << "input pointer: " << input_pointer << std::endl;
-        std::cout << "number of available transitions: " << available_transitions.size() << std::endl;
-    #endif
+        // load some data 
+        ExecutionConfig current_config = bfsQueue.front();
+        bfsQueue.pop();
+        std::shared_ptr<State> cur_state = std::get<0>(current_config);
+        unsigned int cur_input_ptr = std::get<1>(current_config);
+        char c = string.at(cur_input_ptr);
 
-    // 
-    if (available_transitions.size() == 0) {
-        return;
-    }
-
-    // execute in parallel for each available transition 
-    for (auto transition : available_transitions) {
-        int next_input_pointer = input_pointer;
-        std::shared_ptr<State> q2 = std::get<2>(transition);
-        
-        // only increment the input pointer for non-epsilon symbol consumptions.
-        if (std::get<1>(transition) != EPSILON) {
-            next_input_pointer++;
+        //check if we are in accept configuration 
+        if (cur_state->type == ACCEPT && cur_input_ptr == string.size()) {
+            accept = true; 
+            break;
         }
 
-        // recursively execute all possible NFA derivations.
-        execute(q2, string, next_input_pointer); 
-    }    
+        // push available transitions to the queue
+        TransitionTable available_transitions = computeAvailableTransitions(cur_state, c); 
+        std::cout << " available transitions" << std::endl;
+        printTransitionTable(available_transitions); 
+        for (auto transition : available_transitions) {
+            std::shared_ptr<State> q2 = std::get<2>(transition);
+            char sigma = std::get<1>(transition);
+
+            unsigned int new_input_ptr = cur_input_ptr;
+            if (sigma != EPSILON ) {
+                new_input_ptr++;
+            }
+
+            bfsQueue.push({q2, new_input_ptr});
+        }
+    }
     return; 
 }
 
-void NFA::printTransitionTable() {
+void NFA::computeComplement() {
+
+    std::shared_ptr<State> new_start_state = std::make_shared<State>(REJECT);
+    this->startState = new_start_state;
+
+    // flip reject states to accept
+    for (auto state : this->states) {
+        if (state->type == REJECT) {
+            state->type = ACCEPT;
+        }
+    }
+
+    // flip accept states to reject
+    for (auto state : this->acceptStates) {
+        state->type = REJECT;
+        addTransition(startState, state, EPSILON);
+    }
+
+    // invert transition rule
+    for (auto transition_tuple : this->transition_table) {
+        std::cout << "q1: " << std::get<0>(transition_tuple); 
+        std::cout << " sigma: " << std::get<1>(transition_tuple);
+        std::cout << " --> ";
+        std::cout << " q2: " << std::get<2>(transition_tuple) << std::endl;
+
+        std::shared_ptr<State> q1 = std::get<0>(transition_tuple);
+        std::shared_ptr<State> q2 = std::get<2>(transition_tuple);
+        
+        std::get<2>(transition_tuple) = q1;
+        std::get<0>(transition_tuple) = q2; 
+    }
+}
+
+void NFA::printTransitionTable(TransitionTable transition_table) {
+
     for ( TransitionTable::iterator it = transition_table.begin(); it != transition_table.end(); it++) {
         // Get key and value
         TransitionTuple transition_tuple = *it;
