@@ -135,17 +135,6 @@ void NFA::execute(std::shared_ptr<State> start_state, const std::string &string,
             break;
         }
 
-<<<<<<< HEAD
-    #if DEBUG_NFA
-        std::cout << "==== EXECUTE ====" << std::endl; std::cout << "Current State: " << current_state << std::endl;
-        std::cout << "String: " << string << std::endl; std::cout << "input pointer: " << input_pointer << std::endl; 
-        std::cout << "number of available transitions: " << available_transitions.size() << std::endl;
-    #endif
-
-    //crash the  
-    if (available_transitions.size() == 0) {
-        return;
-=======
         // push available transitions to the queue
         TransitionTable available_transitions = computeAvailableTransitions(cur_state, c); 
         std::cout << " available transitions" << std::endl;
@@ -161,7 +150,6 @@ void NFA::execute(std::shared_ptr<State> start_state, const std::string &string,
 
             bfsQueue.push({q2, new_input_ptr});
         }
->>>>>>> complement
     }
     return; 
 }
