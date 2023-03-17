@@ -45,6 +45,5 @@ EMPTY_SET = '\0';
 - Automated testcases
 
 ### Todo
-- Kleen star closure
-- Concatenation closure
+- Compile to WASM for webiste? Or use binary method like before
 - Set up command line interface to be user friendly, intuitive and with more options 
