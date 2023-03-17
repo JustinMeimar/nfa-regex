@@ -33,7 +33,6 @@ void Parser::readStream(const std::string &instream) {
 void Parser::match(Type type) {
 
     if (nextToken->type == type) {
-        std::cout << "matched " << type << std::endl;
         advance(); 
     } else {
         printf("unexpected type recieved: %d, expected: %d", type, nextToken->type); 
@@ -148,9 +147,9 @@ void Parser::paren() {
 void Parser::leaf() { 
     #if DEBUG
         printf("===call leaf\n");
+        std::cout << "token we are assigning into the node: " << nextToken << std::endl; 
     #endif
 
-    std::cout << "token we are assigning into the node: " << nextToken << std::endl; 
     std::shared_ptr<Node> leaf_node = std::make_shared<Node>(nextToken);
     enterRule(leaf_node);
 

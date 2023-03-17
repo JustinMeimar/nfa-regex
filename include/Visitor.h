@@ -9,7 +9,7 @@
 #include "Node.h"
 #include "NFA.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 class Visitor {
     public:

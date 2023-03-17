@@ -17,7 +17,7 @@
 #define EPSILON_H
     #define EPSILON '\xCE' //Unicode character for epsilon 
 #endif
-#define DEBUG_NFA 1
+#define DEBUG_NFA 0
 
 typedef std::tuple<std::shared_ptr<State>, const char, std::shared_ptr<State>> TransitionTuple;
 typedef std::set<TransitionTuple> TransitionTable;

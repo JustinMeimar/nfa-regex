@@ -66,9 +66,9 @@ void NFA::constructFromUnion(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs)
     // Create new start state  
     std::shared_ptr<State> new_start_state = std::make_shared<State>(REJECT);
     this->startState = new_start_state;
-    this->transition_table = lhs->transition_table;
     this->acceptStates = unionStates(lhs->acceptStates, rhs->acceptStates);
 
+    copyTransitions(&lhs->transition_table, &transition_table); 
     copyTransitions(&rhs->transition_table, &transition_table); 
 
     addTransition(startState, lhs->startState, EPSILON);
@@ -97,14 +97,12 @@ void NFA::constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs
     // Set each LHS accept state to reject, but add an epsilon transition to the RHS start state
     std::shared_ptr<State> rhsStartState = rhs->startState;   
     for (auto acceptState : lhs->acceptStates) {
-        std::cout << "accept: "<< acceptState << std::endl;
         acceptState->type = REJECT;
         addTransition(acceptState, rhsStartState, EPSILON);
     }
     
     // Set each RHS accept state to reject, but add an epsilon transition to the final AcceptState
     for (auto acceptState : rhs->acceptStates) {
-        std::cout << "accept: "<< acceptState << std::endl;
         acceptState->type = REJECT;
         addTransition(acceptState, newAcceptState, EPSILON);
     }
@@ -136,8 +134,6 @@ are collected, then each transition executes and reports back what it found on t
 an accept state exists some finite distance from the root, it will be found and the program will halt.  
 */
 void NFA::execute(std::shared_ptr<State> start_state, const std::string &string, unsigned int input_pointer) {
-
-    printTransitionTable(transition_table);
 
     std::queue<ExecutionConfig> bfsQueue;
     bfsQueue.push({start_state, 0});

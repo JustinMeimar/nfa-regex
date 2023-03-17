@@ -1,0 +1,11 @@
+aUb b 0
+aUb a 0
+a&b ab 0
+ab ab 0
+aUb&c a 0
+aUb&c bc 0
+aUb ab 1
+aUbUc e 1
+ab ac 1
+ab bd 1
+aUb&c ac 1

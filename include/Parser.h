@@ -6,7 +6,7 @@
 #include "Token.h"
 #include "Node.h"
 
-#define DEBUG 1 //debug flag
+#define DEBUG 0 //debug flag
 
 class Parser {
     private:
