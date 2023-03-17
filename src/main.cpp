@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
     std::string string;
 
     if (argc == 1) {
-        printf("no erguments supplied...\n");
+        printf("no arguments supplied...\n");
         return 0;
     } else if (argc >= 2) {
         regex = argv[1]; //regex specification
@@ -24,6 +24,7 @@ int main(int argc, char** argv) {
     } 
 
     regexParser->readStream(regex);
+    regexParser->insertImplicitConcatTokens();
     regexParser->regex();
 
     std::shared_ptr<Node> root = regexParser->root; 

@@ -16,11 +16,11 @@ void Parser::readStream(const std::string &instream) {
         char c = instream[i];
         if (c == '\"' || c == ' ') {
             continue;
-        } 
+        }
 
         int charPosition = tokenStream.size();
         tokenStream.push_back(std::make_shared<Token>(c, charPosition));
-        
+
         #if DEBUG
         std::cout << tokenStream[charPosition]->type << " | " 
             << tokenStream[charPosition]->character << std::endl;
@@ -155,4 +155,19 @@ void Parser::leaf() {
     enterRule(leaf_node);
 
     match(LETTER);
+}
+    
+void Parser::insertImplicitConcatTokens() {
+
+    char concat = '&';
+    for (int i = 0; i < tokenStream.size()-1; i++) {
+ 
+        std::shared_ptr<Token> t1 = tokenStream[i]; 
+        std::shared_ptr<Token> t2 = tokenStream[i+1]; 
+ 
+        if (t1->type == LETTER && t2->type == LETTER) {
+            std::shared_ptr<Token> implicitConcat = std::make_shared<Token>(concat, 0);
+            tokenStream.insert(tokenStream.begin() + i + 1, implicitConcat);
+        }
+    }
 }
