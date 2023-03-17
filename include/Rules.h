@@ -1,14 +1,3 @@
-/*
-grammar: 
-
-regex: union; 
-union : concat (UNION concat)*; 
-concat : star (CONCAT star)*;
-star : paren (STAR)*;
-paren : leaf | '('union ')';
-leaf: (LETTER | EPSILON | EMPTY_SET);
-*/
-
 #ifndef RULES_H
 #define RULES_H 
 

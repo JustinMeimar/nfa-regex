@@ -3,6 +3,9 @@
 Parser::Parser() { root = std::make_shared<Node>(RULE_ROOT); ctx = root; }
 Parser::~Parser() {}
 
+/** Tie the parse tree context from the current node to the 
+ * newly created node.
+ */
 void Parser::enterRule(std::shared_ptr<Node> rule_node) {
     //link parent node to new rule node   
     ctx->addChild(rule_node);
@@ -10,6 +13,9 @@ void Parser::enterRule(std::shared_ptr<Node> rule_node) {
     ctx = rule_node;
 }
 
+/* Creates token stream from the regex specfication passed in from
+* the command line.
+*/
 void Parser::readStream(const std::string &instream) {
     
     for (int i = 0; i < instream.length(); i++) {
@@ -30,6 +36,9 @@ void Parser::readStream(const std::string &instream) {
     nextToken = tokenStream[0]; //assign next token to first in stream
 }
 
+/* Aserts that the following token is of the type we expect given the context.
+* For example we expect a symbol after a 'U' or '&'
+*/
 void Parser::match(Type type) {
 
     if (nextToken->type == type) {
@@ -40,6 +49,9 @@ void Parser::match(Type type) {
     }
 }
 
+/* Advance the pointer into the stream
+ * @return void when the entire stream has been consumed.
+ */
 void Parser::advance() {
     if (streamIndex >= tokenStream.size()) {
         return; 
@@ -48,6 +60,8 @@ void Parser::advance() {
     nextToken = tokenStream[streamIndex];
 }
 
+/* Top level parser rule. Expects the special end token 
+ */
 void Parser::regex() {
     #if DEBUG 
         printf("===call regex\n");
@@ -60,11 +74,11 @@ void Parser::regex() {
         ctx = regex_root; 
         union_();
     }
-
-    std::cout << "string succesfully parsed!\n" << std::endl;
-
 }
 
+/* Union parser rule. Lowest precedence thus called first. Expects
+ * the 'U' symbol between two symbols as it is a binary operator. 
+ */
 void Parser::union_() {
     #if DEBUG   
         printf("===call union\n");
@@ -83,6 +97,9 @@ void Parser::union_() {
     }  
 }
 
+/** Concat parser rule. Second lowest precedence thus called below Union. Expects
+ * the '&' symbol between two symbols as it is a binary operator. 
+ */
 void Parser::concat() {
     #if DEBUG   
         printf("===call concat\n");
@@ -101,6 +118,9 @@ void Parser::concat() {
     }
 }
 
+/** Star parser rule. Highest precedence. Expects the '*' symbol, 
+ * right associative on a symbol as it is a unary operator. 
+ */
 void Parser::star() {
     #if DEBUG
         printf("===call star\n");
@@ -118,6 +138,10 @@ void Parser::star() {
     } 
 }
 
+/** Matches a left parentheses and expects a right parentheses.
+ * Calls UNION inside so that Union operator may be higher precedence when
+ * wrapped in parentheses.
+ */
 void Parser::paren() {
     #if DEBUG
         printf("===call paren\n");
@@ -140,6 +164,10 @@ void Parser::paren() {
     } 
 }
 
+/** Matches a left parentheses and expects a right parentheses.
+ * Calls UNION inside so that Union operator may be higher precedence when
+ * wrapped in parentheses.
+ */
 void Parser::leaf() { 
     #if DEBUG
         printf("===call leaf\n");
@@ -151,7 +179,14 @@ void Parser::leaf() {
 
     match(LETTER);
 }
-    
+ 
+
+/** Inserts implicit concatenation tokens in the following cases
+ * 1) letter letter: "ab" -> "a&b".
+ * 2) rparen letter: "(a)(b)" -> "(a)&(b)".
+ * 3) rparen lapren: "(a)b" -> "(a)&b".
+ * 4) letter lparen: "a(b)" -> "a&(b)".
+ */   
 void Parser::insertImplicitConcatTokens() {
 
     char concat = '&';

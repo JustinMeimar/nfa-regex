@@ -1,5 +1,10 @@
 #include "Visitor.h"
 
+/**
+ * Visit the given node.
+ * @param node The node to visit.
+ * @return void
+ */
 void Visitor::visit(std::shared_ptr<Node> node) {
 
     switch(node->rule) {
@@ -31,6 +36,11 @@ void Visitor::visit(std::shared_ptr<Node> node) {
     return;
 }
 
+/**
+ * Helper function to process stack operations for binary operators.
+ * @param rule The parser rule associated with the binary operator.
+ * @return void
+ */
 void Visitor::stackHelper(ParserRule rule) {
  
     std::shared_ptr<NFA> rhsNFA = expr_stack.top(); // Pop RHS NFA pointer 
@@ -45,6 +55,11 @@ void Visitor::stackHelper(ParserRule rule) {
     return;
 }
 
+/**
+ * Visit all children of the given node.
+ * @param node The parent node whose children to visit.
+ * @return void
+ */
 void Visitor::visitChildren(std::shared_ptr<Node> node) {
     
     for (auto node : node->children) {
@@ -53,6 +68,11 @@ void Visitor::visitChildren(std::shared_ptr<Node> node) {
     return;
 }
 
+/**
+ * Visit the root node of the parse tree.
+ * @param node The root node of the parse tree.
+ * @return void
+ */
 void Visitor::visitRoot(std::shared_ptr<Node> node) {
  
     // Visit the entire tree 
@@ -69,6 +89,11 @@ void Visitor::visitRoot(std::shared_ptr<Node> node) {
     return;
 }
 
+/**
+ * Visit a regex node.
+ * @param node The regex node to visit.
+ * @return void
+ */
 void Visitor::visitRegex(std::shared_ptr<Node> node) {
     #if DEBUG
         std::cout << "Visit Regex" << std::endl;
@@ -77,6 +102,11 @@ void Visitor::visitRegex(std::shared_ptr<Node> node) {
     return;
 }
 
+/**
+ * Visit a union node.
+ * @param node The union node to visit.
+ * @return void
+ */
 void Visitor::visitUnion(std::shared_ptr<Node> node) {
     #if DEBUG
         std::cout << "Visit Union" << std::endl;
@@ -93,6 +123,11 @@ void Visitor::visitUnion(std::shared_ptr<Node> node) {
     visitChildren(node);
 }
 
+/**
+ * Visit a concatenation node.
+ * @param node The concatenation node to visit.
+ * @return void
+ */
 void Visitor::visitConcat(std::shared_ptr<Node> node) {
     #if DEBUG
         std::cout << "Visit Concat" << std::endl;
@@ -109,6 +144,11 @@ void Visitor::visitConcat(std::shared_ptr<Node> node) {
     visitChildren(node);   
 }
 
+/**
+ * Visit a star node.
+ * @param node The star node to visit.
+ * @return void
+ */
 void Visitor::visitStar(std::shared_ptr<Node> node) {
     #if DEBUG
         std::cout << "Visit Star" << std::endl;
@@ -128,6 +168,11 @@ void Visitor::visitStar(std::shared_ptr<Node> node) {
     visitChildren(node);
 }
 
+/**
+ * Visit a paren node.
+ * @param node The paren node to visit.
+ * @return void
+ */
 void Visitor::visitParen(std::shared_ptr<Node> node) {
    #if DEBUG
         std::cout << "Visit Paren" << std::endl;
@@ -141,6 +186,11 @@ void Visitor::visitParen(std::shared_ptr<Node> node) {
     return;   
 }
 
+/**
+ * Visit a leaf node.
+ * @param node The leaf node to visit.
+ * @return void
+ */
 void Visitor::visitLeaf(std::shared_ptr<Node> node) {
 
     #if DEBUG
