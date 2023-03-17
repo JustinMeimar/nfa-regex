@@ -34,7 +34,6 @@ class Parser {
         void leaf();
 
         void match(Type type);  //match token of type x
-        void expect(Type type); //expect a token type at current stream index
         void advance();         //increment stream index
 
         // hacky helper method for making input strings have implicit concatenation between adjacent characters. 

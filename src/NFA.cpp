@@ -25,11 +25,14 @@ NFA::NFA(ParserRule rule, std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) : 
             break;
         case RULE_CONCAT:
             constructFromConcat(lhs, rhs);
-            break; 
-        case RULE_STAR:
-            constructFromStar(lhs);
+            break;  
     }
 }     
+
+// New NFA composed from kleen star operator
+NFA::NFA(ParserRule rule, std::shared_ptr<NFA> nfa) : accept(false) {
+    constructFromStar(nfa);
+}    
 
 void NFA::addTransition(std::shared_ptr<State> q1, std::shared_ptr<State> q2, const char sigma) {
     
@@ -108,7 +111,28 @@ void NFA::constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs
     }
 }
 
-void NFA::constructFromStar(std::shared_ptr<NFA> lhs) {}
+void NFA::constructFromStar(std::shared_ptr<NFA> nfa) {
+    #if DEBUG_NFA
+        std::cout << "== Construct from Star" << std::endl;
+    #endif 
+
+    std::shared_ptr<State> newStartState = std::make_shared<State>(REJECT);
+    std::shared_ptr<State> newAcceptState = std::make_shared<State>(ACCEPT);
+    this->startState = newStartState;
+    this->acceptStates = {newAcceptState};
+
+    copyTransitions(&nfa->transition_table, &this->transition_table);
+
+    addTransition(newStartState, nfa->startState, EPSILON);
+    addTransition(newStartState, newAcceptState, EPSILON);
+
+    for (auto acceptState : nfa->acceptStates) {
+        acceptState->type = REJECT; 
+        addTransition(acceptState, newAcceptState, EPSILON);
+        addTransition(acceptState, nfa->startState, EPSILON);
+    }
+
+}
 
 TransitionTable NFA::computeAvailableTransitions(std::shared_ptr<State> current_state, char c) {
     
@@ -134,6 +158,10 @@ are collected, then each transition executes and reports back what it found on t
 an accept state exists some finite distance from the root, it will be found and the program will halt.  
 */
 void NFA::execute(std::shared_ptr<State> start_state, const std::string &string, unsigned int input_pointer) {
+
+    #if DEBUG_NFA
+        printTransitionTable(this->transition_table); 
+    #endif
 
     std::queue<ExecutionConfig> bfsQueue;
     bfsQueue.push({start_state, 0});

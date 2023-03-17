@@ -40,10 +40,6 @@ void Parser::match(Type type) {
     }
 }
 
-void Parser::expect(Type type) {
-    //expects a certain token to be at the streamIndex
-}
-
 void Parser::advance() {
     if (streamIndex >= tokenStream.size()) {
         return; 
@@ -164,7 +160,8 @@ void Parser::insertImplicitConcatTokens() {
         std::shared_ptr<Token> t1 = tokenStream[i]; 
         std::shared_ptr<Token> t2 = tokenStream[i+1]; 
  
-        if (t1->type == LETTER && t2->type == LETTER) {
+        if (t1->type == LETTER && t2->type == LETTER  || t1->type == RPAREN && t2->type == LETTER 
+        || t1->type == RPAREN && t2->type == LPAREN  || t1->type == LETTER && t2->type == LPAREN) {
             std::shared_ptr<Token> implicitConcat = std::make_shared<Token>(concat, 0);
             tokenStream.insert(tokenStream.begin() + i + 1, implicitConcat);
         }

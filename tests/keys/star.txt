@@ -1,0 +1,24 @@
+a* a 0
+ab* abb 0
+a*  0
+(a)* aa 0
+a* a 0
+a* b 1
+a* aaaaaaaaaaaaaaaa 0
+a* aaaaabaaaaaaa 1
+a* aaaab 1
+(aUb)* aaabababa 0
+(aUb)* aaabababc 1
+(aUb&c)* abcabcabc 0
+(aUb&c)* abcabcaaa 0
+(aUb&c)* bcbcbcabc 0
+(aUb&c)* abcabcabcc 1
+(aUb&c)* abcabcaab 1
+a*Ub* aaaaaa 0
+a*Ub* bb 0
+a*Ub* ab 1
+aU(b&c)* bcbcbcbcbc 0
+aU(b&c)* a 0
+aU(b&c)* abc 1
+(a*)b aaaab 0
+(a*)&b aaaab 0

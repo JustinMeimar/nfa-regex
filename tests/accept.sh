@@ -1,9 +1,7 @@
 re=$1
 string=$2
 if ../bin/regex $re $string | grep -q 'Accept String'; then
-    # echo "accepted"
-    exit 0;
+    exit 0 #0 means accept
 else 
-    # echo "rejected"    
-    exit 1
+    exit 1 #1 means reject
 fi

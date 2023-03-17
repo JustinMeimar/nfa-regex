@@ -28,7 +28,6 @@ int main(int argc, char** argv) {
     regexParser->regex();
 
     std::shared_ptr<Node> root = regexParser->root; 
-
     std::shared_ptr<Visitor> visitor = std::make_shared<Visitor>(); 
     visitor->visit(root);
 
@@ -40,6 +39,8 @@ int main(int argc, char** argv) {
     } else {
         std::cout << "Reject String :(" << std::endl;
     }
+    /*
+    */
 
     return 0;
 }

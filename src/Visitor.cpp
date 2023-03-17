@@ -114,16 +114,17 @@ void Visitor::visitStar(std::shared_ptr<Node> node) {
         std::cout << "Visit Star" << std::endl;
     #endif 
     
-    //TODO: think about star more  
     if (node->children.size() == 2) {
-        // Visit LHS and RHS child nodes       
         visit(node->children[0]); 
-        visit(node->children[2]);
-        stackHelper(RULE_STAR);  
-
+        
+        std::shared_ptr<NFA> starNFA = expr_stack.top(); // Pop RHS NFA pointer 
+        expr_stack.pop();      
+        std::shared_ptr<NFA> resultNFA = std::make_shared<NFA>(RULE_STAR, starNFA);
+        expr_stack.push(resultNFA);
+        
         return;
-    } 
-    
+    }  
+
     visitChildren(node);
 }
 
@@ -131,6 +132,11 @@ void Visitor::visitParen(std::shared_ptr<Node> node) {
    #if DEBUG
         std::cout << "Visit Paren" << std::endl;
     #endif 
+
+    if (node->children.size() == 3) {
+        visit(node->children[1]);
+        return; 
+    }
     visitChildren(node);
     return;   
 }

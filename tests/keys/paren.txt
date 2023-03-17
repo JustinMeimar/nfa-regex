@@ -1,0 +1,15 @@
+(((a))) a 0
+(a)(b) ab 0
+((a)(((b)))) ab 0
+a(b) ab 0
+(a)b ab 0
+(a(b)) ab 0
+(a(b(c))) abc 0
+(a(bUcUde)) a 1
+(a(bUcUde)) ade 0
+(a(bUcUde)) ac 0
+(aa(bUcUde)) aac 0
+(a(bUcUde)*)* accc 0
+(a(bUcUde)*)*  0
+(a(bUcUde)*)* adedede 0
+(a(bUcUde)*)* adeadeade 0
