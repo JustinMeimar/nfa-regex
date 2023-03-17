@@ -38,10 +38,12 @@ EMPTY_SET = '\0';
 - Recursive Descent parser to recognize valid regular expressions
 - Respect operator precedence. 
 - Parse Tree generation 
+- Generate NFA by walking the Parse Tree
+- execute strings on NFA
+- Union closure
+- Concatenation closure
+- Automated testcases
 
 ### Todo
-- Automatically reduce Parse tree into AST (currently ~70% redundant nodes due to the
-  grammar and parsing strategy)  
-- Generate NFA by walking the AST
-- use threads to execute strings on NFA
-- set up command line interface to be user friendly, intuitive and with more options 
+- Compile to WASM for webiste? Or use binary method like before
+- Set up command line interface to be user friendly, intuitive and with more options 
