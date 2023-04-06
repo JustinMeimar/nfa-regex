@@ -13,7 +13,8 @@ NFA's can have an exponential running time due its parallel executions, which is
 regex: union;
 union: concat (UNION concat)*;
 concat: star (CONCAT star)*;
-star: paren (STAR)*;
+star: comp (STAR)*;
+comp: (NOT)* paren;
 paren: leaf | '('union ')';
 leaf: (LETTER | EPSILON | EMPTY_SET);
 

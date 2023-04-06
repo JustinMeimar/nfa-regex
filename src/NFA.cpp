@@ -31,7 +31,14 @@ NFA::NFA(ParserRule rule, std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) : 
 
 // New NFA composed from kleen star operator
 NFA::NFA(ParserRule rule, std::shared_ptr<NFA> nfa) : accept(false) {
-    constructFromStar(nfa);
+    switch(rule) {
+        case RULE_STAR:
+            constructFromStar(nfa);
+            break;
+        case RULE_COMP:
+            constructFromCompliment(nfa);
+            break;
+    }
 }    
 
 void NFA::addTransition(std::shared_ptr<State> q1, std::shared_ptr<State> q2, const char sigma) {
@@ -132,6 +139,15 @@ void NFA::constructFromStar(std::shared_ptr<NFA> nfa) {
         addTransition(acceptState, nfa->startState, EPSILON);
     }
 
+}
+
+void NFA::constructFromCompliment(std::shared_ptr<NFA> nfa) {
+    #if DEBUG_NFA
+        std::cout << "== Construct from Compliment" << std::endl;
+    #endif 
+
+    // Implement compliment
+    
 }
 
 TransitionTable NFA::computeAvailableTransitions(std::shared_ptr<State> current_state, char c) {

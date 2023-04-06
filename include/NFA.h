@@ -41,7 +41,8 @@ class NFA {
         void addTransition(std::shared_ptr<State> q1, std::shared_ptr<State> q2, const char sigma); //add a transitino from (q1, sigma)  > q2
         void constructFromUnion(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs);
         void constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs);
-        void constructFromStar(std::shared_ptr<NFA> lhs);
+        void constructFromStar(std::shared_ptr<NFA> nfa); //rassoc
+        void constructFromCompliment(std::shared_ptr<NFA> nfa); //lassoc
 
         //execution:
         void execute(std::shared_ptr<State> start_state, const std::string &string, unsigned int input_pointer);

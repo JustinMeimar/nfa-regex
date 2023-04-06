@@ -167,6 +167,29 @@ void Visitor::visitStar(std::shared_ptr<Node> node) {
 
     visitChildren(node);
 }
+/**
+ * Visit a paren node.
+ * @param node The paren node to visit.
+ * @return void
+ */
+void Visitor::visitComp(std::shared_ptr<Node> node) {
+    #if DEBUG
+        std::cout << "Visit Star" << std::endl;
+    #endif 
+
+    if (node->children.size() == 2) {
+        visit(node->children[1]);
+        
+        std::shared_ptr<NFA> compNFA = expr_stack.top();
+        expr_stack.pop();
+        std::shared_ptr<NFA> resultNFA = std::make_shared<NFA>(RULE_COMP, compNFA);
+        expr_stack.push(resultNFA);
+
+        return;
+    }
+
+    visitChildren(node);
+}
 
 /**
  * Visit a paren node.

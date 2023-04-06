@@ -130,12 +130,27 @@ void Parser::star() {
     std::shared_ptr<Node> star_node = std::make_shared<Node>(RULE_STAR);
     enterRule(star_node);
 
-    paren();
+    comp();
     while (nextToken->type == STAR){
         star_node->addChild(std::make_shared<Node>(nextToken));
         match(STAR);
         ctx = star_node;
     } 
+}
+
+void Parser::comp() {
+    #if DEBUG
+        printf("====call comp\n");
+    #endif
+
+    while(nextToken->type == NOT) { 
+        std::shared_ptr<Node> comp_node = std::make_shared<Node>(RULE_COMP);
+        match(NOT);
+        ctx = comp_node;
+    }
+    paren();
+    
+
 }
 
 /** Matches a left parentheses and expects a right parentheses.

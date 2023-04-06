@@ -9,6 +9,7 @@ enum Type {
     LETTER,
     EPSILON,
     EMPTY_SET,
+    NOT,
     END
 };
 

@@ -23,6 +23,7 @@ Type Token::recognizeType(char c) {
     else if (c == '*')  {type = STAR;}
     else if (c == '\e') {type = EPSILON;}
     else if (c == '\0') {type = EMPTY_SET;}
+    else if (c == '~') {type = NOT;}
     else if (c == '(')  {type = LPAREN;} 
     else if (c == ')')  {type = RPAREN;}
     else                {type = LETTER;}
