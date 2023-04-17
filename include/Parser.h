@@ -30,6 +30,7 @@ class Parser {
         void union_(); //avoid name conflict.
         void concat();
         void star();
+        void complement(); 
         void paren(); 
         void leaf();
 

@@ -27,6 +27,7 @@ class Visitor {
         void visitUnion(std::shared_ptr<Node> node);
         void visitConcat(std::shared_ptr<Node> node);
         void visitStar(std::shared_ptr<Node> node);
+        void visitComp(std::shared_ptr<Node> node);
         void visitParen(std::shared_ptr<Node> node);
         void visitLeaf(std::shared_ptr<Node> node);
 

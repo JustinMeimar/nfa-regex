@@ -25,6 +25,7 @@ Type Token::recognizeType(char c) {
     else if (c == '\0') {type = EMPTY_SET;}
     else if (c == '(')  {type = LPAREN;} 
     else if (c == ')')  {type = RPAREN;}
+    else if (c == '~')  {type = COMPLEMENT;}
     else                {type = LETTER;}
 
     return type;

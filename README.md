@@ -14,12 +14,14 @@ regex: union;
 union: concat (UNION concat)*;
 concat: star (CONCAT star)*;
 star: paren (STAR)*;
+complement: (COMPLEMENT)* paren;
 paren: leaf | '('union ')';
 leaf: (LETTER | EPSILON | EMPTY_SET);
 
 UNION = 'U';
 CONCAT = '&';
 STAR = '*';
+COMPLEMENT = "~"
 LETTER = [a-zA-Z];
 EPSILON = '\e';
 EMPTY_SET = '\0';
@@ -27,9 +29,10 @@ EMPTY_SET = '\0';
 ### Operator Precedence
 ```
 0. parentheses '(' ')'
-1. kleen star '*'
-2. concatenation '&'
-3. union 'U'
+1. complement '~'
+2. kleen star '*'
+3. concatenation '&'
+4. union 'U'
 ```
 
 ### State of Progress

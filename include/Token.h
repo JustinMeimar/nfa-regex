@@ -4,6 +4,7 @@ enum Type {
     STAR, 
     CONCAT, 
     UNION, 
+    COMPLEMENT,
     LPAREN,
     RPAREN,
     LETTER,

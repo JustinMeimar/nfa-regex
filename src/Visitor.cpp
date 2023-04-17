@@ -30,6 +30,7 @@ void Visitor::visit(std::shared_ptr<Node> node) {
             visitLeaf(node);
             break; 
         default: 
+            visitChildren(node);
             break;
     }
 
@@ -168,7 +169,14 @@ void Visitor::visitStar(std::shared_ptr<Node> node) {
     visitChildren(node);
 }
 
-/**
+void Visitor::visitComp(std::shared_ptr<Node> node) {
+
+    visitChildren(node);
+
+    return;
+}
+
+/** 
  * Visit a paren node.
  * @param node The paren node to visit.
  * @return void
