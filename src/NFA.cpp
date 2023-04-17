@@ -11,6 +11,7 @@ NFA::NFA(ParserRule rule, std::shared_ptr<Token> token) : accept(false) {
     std::shared_ptr<State> acceptState = std::make_shared<State>(ACCEPT);
     
     this->startState = startState;
+    this->states = StateSet({startState, acceptState}); 
     this->acceptStates.insert(acceptState);  
 
     addTransition(startState, acceptState, token->character);
@@ -31,16 +32,20 @@ NFA::NFA(ParserRule rule, std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs) : 
 
 // New NFA composed from kleen star operator
 NFA::NFA(ParserRule rule, std::shared_ptr<NFA> nfa) : accept(false) {
-    constructFromStar(nfa);
+    std::cout << "RULE:" << rule << std::endl;
+    switch(rule) {
+        case RULE_STAR:
+            constructFromStar(nfa);
+            break;
+        case RULE_COMP:
+            constructFromComplement(nfa);
+            break;  
+    }
 }    
 
 void NFA::addTransition(std::shared_ptr<State> q1, std::shared_ptr<State> q2, const char sigma) {
     
     TransitionTuple transition_tuple = {q1, sigma, q2};  
-    
-    #if DEBUG_NFA
-    #endif
-
     transition_table.insert(transition_tuple);
 }
 
@@ -69,6 +74,7 @@ void NFA::constructFromUnion(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs)
     // Create new start state  
     std::shared_ptr<State> new_start_state = std::make_shared<State>(REJECT);
     this->startState = new_start_state;
+    this->states = unionStates(lhs->states, rhs->states);
     this->acceptStates = unionStates(lhs->acceptStates, rhs->acceptStates);
 
     copyTransitions(&lhs->transition_table, &transition_table); 
@@ -88,6 +94,7 @@ void NFA::constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs
     std::shared_ptr<State> newStartState = std::make_shared<State>(REJECT);
     std::shared_ptr<State> newAcceptState = std::make_shared<State>(ACCEPT);    
     this->startState = newStartState;
+    this->states = unionStates(lhs->states, rhs->states);
     this->acceptStates.insert({newAcceptState});   
 
     // Add transition from the new Start state to the LHS Start state
@@ -111,6 +118,36 @@ void NFA::constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs
     }
 }
 
+void NFA::constructFromComplement(std::shared_ptr<NFA> nfa) {
+    #if DEBUG_NFA
+        std::cout << "== Construct from Complement" << std::endl;
+    #endif 
+    std::cout << "construct from complement" << std::endl;
+    
+    this->transition_table = nfa->transition_table;
+    this->startState = nfa->startState;
+    this->acceptStates = nfa->acceptStates;
+    this->states = nfa->states;
+    std::cout << "states:" << std::endl;
+    std::cout << nfa->states.size();
+    std::cout << nfa->acceptStates.size();
+    for (StateSet::iterator it = nfa->states.begin(); it != nfa->states.end(); it++) {
+        // TODO: FLIP STATES EASY MONEY
+        // std::cout << "flip this state" << std::endl;
+        // std::cout << "flip state" << std::endl;
+        // StateSet stateSet = *it;
+        // std::shared_ptr<State> state = std::get<>
+        // if (state->type == REJECT) {
+            // state->type = ACCEPT;
+        // } else {
+            // state->type = REJECT;
+        // }
+    } 
+            // for (auto state : this->acceptStates) {
+    //     state->type == REJECT;
+    // }
+}
+
 void NFA::constructFromStar(std::shared_ptr<NFA> nfa) {
     #if DEBUG_NFA
         std::cout << "== Construct from Star" << std::endl;
@@ -119,6 +156,7 @@ void NFA::constructFromStar(std::shared_ptr<NFA> nfa) {
     std::shared_ptr<State> newStartState = std::make_shared<State>(REJECT);
     std::shared_ptr<State> newAcceptState = std::make_shared<State>(ACCEPT);
     this->startState = newStartState;
+    this->states = nfa->states; // INSERT
     this->acceptStates = {newAcceptState};
 
     copyTransitions(&nfa->transition_table, &this->transition_table);

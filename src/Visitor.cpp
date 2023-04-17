@@ -23,6 +23,9 @@ void Visitor::visit(std::shared_ptr<Node> node) {
         case RULE_STAR:
             visitStar(node);
             break;
+        case RULE_COMP:
+            visitComp(node);
+            break;
         case RULE_PAREN:
             visitParen(node);
             break;
@@ -30,7 +33,6 @@ void Visitor::visit(std::shared_ptr<Node> node) {
             visitLeaf(node);
             break; 
         default: 
-            visitChildren(node);
             break;
     }
 
@@ -171,9 +173,13 @@ void Visitor::visitStar(std::shared_ptr<Node> node) {
 
 void Visitor::visitComp(std::shared_ptr<Node> node) {
 
+    if (node->children.size() == 2) { 
+        visit(node->children[1]);
+        std::shared_ptr<NFA> compNFA = expr_stack.top();
+        expr_stack.pop();
+        std::shared_ptr<NFA> resultNFA = std::make_shared<NFA>(RULE_COMP, compNFA); 
+    }
     visitChildren(node);
-
-    return;
 }
 
 /** 

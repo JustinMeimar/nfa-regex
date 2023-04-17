@@ -138,9 +138,22 @@ void Parser::star() {
     } 
 }
 
+/* Left associative complement operator '~' comp_node expects 1 child 
+in a pass down non-match scenario, and two children in the case of a match
+ comp_node
+     |
+    / \
+  '~' paren()
+*/
 void Parser::complement() {
     std::shared_ptr<Node> comp_node = std::make_shared<Node>(RULE_COMP);
-    enterRule(comp_node); 
+    enterRule(comp_node);
+
+    while(nextToken->type == COMPLEMENT) {
+        comp_node->addChild(std::make_shared<Node>(nextToken)); 
+        match(COMPLEMENT);
+        ctx = comp_node; 
+    }
     paren();
 }
 
