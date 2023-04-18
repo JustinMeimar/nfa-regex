@@ -1,3 +1,4 @@
+/web/*.js 
 /build
 /bin
 .vscode
