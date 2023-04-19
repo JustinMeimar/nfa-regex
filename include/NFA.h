@@ -43,8 +43,11 @@ class NFA {
         void constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs);
         void constructFromStar(std::shared_ptr<NFA> lhs);
 
-        //execution:
+        //WASM interface to be binded
         void execute(std::shared_ptr<State> start_state, const std::string &string, unsigned int input_pointer);
+        StateSet getStates() { return states; }
+        TransitionTable getTransitionTable() { return transition_table; }
+        bool getAccept() { return accept; } 
 
         //helper 
         void computeComplement();

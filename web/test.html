@@ -17,6 +17,14 @@
         point.x = 3;
         print.y = 4;
         console.log(point.x);
+        
+        const ACCEPT = 1;
+        const State = Module.State;
+        const state = new State(Module.StateType.ACCEPT);
+        const state2 = new State(Module.StateType.REJECT);
+          
+        console.log(state.type);
+        console.log(state2.type);
       };
 
     </script>

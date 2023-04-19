@@ -65,6 +65,29 @@ EMSCRIPTEN_BINDINGS(my_module) {
     .property("x", &Point::x)
     .property("y", &Point::y);
 
+    emscripten::enum_<StateType>("StateType")
+        .value("ACCEPT", StateType::ACCEPT)
+        .value("REJECT", StateType::REJECT);
+
+    emscripten::class_<State>("State")
+        .smart_ptr_constructor("State", &std::make_shared<State, StateType>)
+        .property("type", &State::type);
+
+    /*
+    //Define some custom types
+    emscripten::type<StateSet>();
+    emscripten::type<TransitionTuple>();
+    emscripten::type<TransitionTable>();
+
+    //Define the NFA class
+    emscripten::class_<NFA>("Nfa") 
+        .constructor<>() 
+        .function() // interface to get states
+        .function() // interface to get transitions
+        .function() // interface to execute the NFA and mutate the 
+        .function() // interface to get the accept state of the machine
+
+    */
     // emscripten::class_<Parser>("Parser")
     // .constructor<>
     // .function()  // sta
