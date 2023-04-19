@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="EN">
+  <head>
+    <meta charset="utf-8" />
+    <title>WebAssembly example</title>
+    <script type="text/javascript" src="regex_web.js"></script>
+    Hello, World
+  </head>
+  <body>
+    <script>
+      console.log("pre mod");
+      // This function will be called when the WebAssembly module is ready
+      Module.onRuntimeInitialized = function () {
+        console.log("Here? I dot")
+        const Point = Module.Point;
+        const point = new Point();
+        point.x = 3;
+        print.y = 4;
+        console.log(point.x);
+      };
+
+    </script>
+  </body>
+</html>
