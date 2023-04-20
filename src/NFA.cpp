@@ -11,6 +11,7 @@ NFA::NFA(ParserRule rule, std::shared_ptr<Token> token) : accept(false) {
     std::shared_ptr<State> acceptState = std::make_shared<State>(ACCEPT);
     
     this->startState = startState;
+    this->states = StateSet({startState, acceptState}); 
     this->acceptStates.insert(acceptState);  
 
     addTransition(startState, acceptState, token->character);
@@ -69,6 +70,7 @@ void NFA::constructFromUnion(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs)
     // Create new start state  
     std::shared_ptr<State> new_start_state = std::make_shared<State>(REJECT);
     this->startState = new_start_state;
+    this->states = unionStates(lhs->states, rhs->states);
     this->acceptStates = unionStates(lhs->acceptStates, rhs->acceptStates);
 
     copyTransitions(&lhs->transition_table, &transition_table); 
@@ -88,6 +90,7 @@ void NFA::constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs
     std::shared_ptr<State> newStartState = std::make_shared<State>(REJECT);
     std::shared_ptr<State> newAcceptState = std::make_shared<State>(ACCEPT);    
     this->startState = newStartState;
+    this->states = unionStates(lhs->states, rhs->states);
     this->acceptStates.insert({newAcceptState});   
 
     // Add transition from the new Start state to the LHS Start state
@@ -119,6 +122,7 @@ void NFA::constructFromStar(std::shared_ptr<NFA> nfa) {
     std::shared_ptr<State> newStartState = std::make_shared<State>(REJECT);
     std::shared_ptr<State> newAcceptState = std::make_shared<State>(ACCEPT);
     this->startState = newStartState;
+    this->states = nfa->states;
     this->acceptStates = {newAcceptState};
 
     copyTransitions(&nfa->transition_table, &this->transition_table);
@@ -157,7 +161,7 @@ TransitionTable NFA::computeAvailableTransitions(std::shared_ptr<State> current_
 are collected, then each transition executes and reports back what it found on the frontier. If 
 an accept state exists some finite distance from the root, it will be found and the program will halt.  
 */
-void NFA::execute(std::shared_ptr<State> start_state, const std::string &string, unsigned int input_pointer) {
+void NFA::execute(std::shared_ptr<State> start_state, const std::string &string) {
 
     #if DEBUG_NFA
         printTransitionTable(this->transition_table); 
@@ -233,11 +237,6 @@ void NFA::computeComplement() {
 
     // invert transition rule
     for (auto transition_tuple : this->transition_table) {
-        std::cout << "q1: " << std::get<0>(transition_tuple); 
-        std::cout << " sigma: " << std::get<1>(transition_tuple);
-        std::cout << " --> ";
-        std::cout << " q2: " << std::get<2>(transition_tuple) << std::endl;
-
         std::shared_ptr<State> q1 = std::get<0>(transition_tuple);
         std::shared_ptr<State> q2 = std::get<2>(transition_tuple);
         
@@ -254,4 +253,10 @@ void NFA::printTransitionTable(TransitionTable transition_table) {
         std::cout << "\t==Transition Function: " << "(" << std::get<0>(*it) << ", " << std::get<1>(*it) << ") => " << std::get<2>(*it) << std::endl;
     }
     return;
+}
+
+void NFA::printStates() {
+    for (auto state : states) {
+        std::cout << "q" << state->getId() << std::endl;
+    }
 }

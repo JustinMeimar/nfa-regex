@@ -9,11 +9,10 @@
 #include "NFA.h"
 #include "Visitor.h"
 
-NFA *createNFA(const std::string &regex);
+std::shared_ptr<NFA> createNFA(const std::string &regex);
 
 int main(int argc, char** argv) {
 
-    auto regexParser = std::make_shared<Parser>();   
     std::string regex;
     std::string string;
 
@@ -26,9 +25,9 @@ int main(int argc, char** argv) {
         string = argv[2]; //string to run on RE 
     }
 
-    NFA *nfa = createNFA(regex);
-    nfa->execute(nfa->startState, string, 0);
-    
+    std::shared_ptr<NFA> nfa = createNFA(regex);
+    nfa->execute(nfa->startState, string);
+    nfa->printStates();
     if (nfa->accept) {
         std::cout << "Accept String :D" << std::endl;
     } else {
@@ -40,7 +39,7 @@ int main(int argc, char** argv) {
 
 
 // NFA FUNCTIONALITY
-NFA *createNFA(const std::string &regex) {
+std::shared_ptr<NFA> createNFA(const std::string &regex) {
 
     auto regexParser = std::make_shared<Parser>();   
     regexParser->readStream(regex);
@@ -51,23 +50,25 @@ NFA *createNFA(const std::string &regex) {
     std::shared_ptr<Visitor> visitor = std::make_shared<Visitor>(); 
     visitor->visit(root);
 
-    return visitor->nfa.get();
+    return visitor->nfa;
 }
 
-void executeNFA(NFA *nfa, const std::string &string) {
-    nfa->execute(nfa->startState, string, 0);
+#ifdef COMPILE_WEB
+void executeNFA(std::shared_ptr<NFA> nfa, const std::string &string) {
+    nfa->execute(nfa->startState, string);
 }
 
 // WRAPPERS
-std::vector<uint32_t> getStatesWrapper(NFA *nfa) {
+std::vector<uint32_t> getStatesWrapper(std::shared_ptr<NFA> nfa) {
     std::vector<uint32_t> states;
     for (auto state : nfa->states) {
         states.push_back( (uint32_t) state.get());
     }
-    return states;
+    return {1, 2, 3, 4};
+    // return states;
 }
 
-std::vector<uint32_t> getAcceptStatesWrapper(NFA *nfa) {
+std::vector<uint32_t> getAcceptStatesWrapper(std::shared_ptr<NFA> nfa) {
     std::vector<uint32_t> acceptStates;
     for (auto state : nfa->acceptStates) {
         acceptStates.push_back( (uint32_t) state.get());
@@ -75,32 +76,36 @@ std::vector<uint32_t> getAcceptStatesWrapper(NFA *nfa) {
     return acceptStates;
 }
 
-bool getDidAcceptWrapper(NFA *nfa) {
+bool getDidAcceptWrapper(std::shared_ptr<NFA> nfa) {
     return nfa->accept;
 }
 
-uint32_t getStartStateWrapper(NFA *nfa) {
+uint32_t getStartStateWrapper(std::shared_ptr<NFA> nfa) {
     return (uint32_t) nfa->startState.get();
 }
 
-// std::vector<std::tuple<int, int, char>> getTransitionTableWrapper(NFA *nfa) { 
+std::vector<std::tuple<int, int, char>> getTransitionTableWrapper(std::shared_ptr<NFA> nfa) { 
 
-//     std::vector<std::tuple<uint32_t, uint32_t, char>> transition_table;
+    std::vector<std::tuple<uint32_t, uint32_t, char>> transition_table;
 
-//     for (auto it = nfa->transition_table.begin(); it != nfa->transition_table.end(); it++) {
-//         std::tuple<uint32_t, uint32_t, char> transition_tup;
-//         std::set transition_tup
-        
-//     }
-// }
+    for (auto it = nfa->transition_table.begin(); it != nfa->transition_table.end(); it++) {
+        std::tuple<uint32_t, uint32_t, char> transition_tup;
+    }
+}
+
+
 
 EMSCRIPTEN_BINDINGS(my_module) {  
-    emscripten::class_<NFA>("NFA");
+    emscripten::class_<NFA>("NFA")
+        .smart_ptr<std::shared_ptr<NFA>>("shared_ptr<NFA>");
 
-    emscripten::function("createNFA", &createNFA, emscripten::allow_raw_pointers()); 
-    emscripten::function("executeNFA", &executeNFA, emscripten::allow_raw_pointers()); 
-    emscripten::function("getDidAccept", &getDidAcceptWrapper, emscripten::allow_raw_pointers()); 
-      
+    emscripten::function("createNFA", &createNFA); 
+    emscripten::function("executeNFA", &executeNFA); 
+    emscripten::function("getDidAccept", &getDidAcceptWrapper); 
+    emscripten::function("getStates", &getStatesWrapper); 
+    emscripten::function("getAcceptStates", &getAcceptStatesWrapper); 
+
+    emscripten::register_vector<uint32_t>("vector_uin32_t");
     // emscripten::function("createNFALeafFactory", &createNFALeafFactory); 
     // emscripten::function("createNFABinaryOpFactory", &createNFABinaryOpFactory); 
     // emscripten::function("createNFAUnaryOpFactory", &createNFAUnaryOpFactory); 
@@ -118,5 +123,4 @@ EMSCRIPTEN_BINDINGS(my_module) {
     //     .property("type", &State::type);
 }
 
-#ifdef COMPILE_WEB
 #endif

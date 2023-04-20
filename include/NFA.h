@@ -44,7 +44,7 @@ class NFA {
         void constructFromStar(std::shared_ptr<NFA> lhs);
 
         //WASM interface to be binded
-        void execute(std::shared_ptr<State> start_state, const std::string &string, unsigned int input_pointer);
+        void execute(std::shared_ptr<State> start_state, const std::string &string);
         StateSet getStates() { return states; }
         TransitionTable getTransitionTable() { return transition_table; }
         bool getAccept() { return accept; } 
@@ -52,6 +52,7 @@ class NFA {
         //helper 
         void computeComplement();
         void printTransitionTable(TransitionTable transition_table);
+        void printStates();
 
     private: 
         void copyTransitions(TransitionTable *src, TransitionTable *dest);

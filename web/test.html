@@ -19,17 +19,36 @@
         const createNFA = Module.createNFA;
         const executeNFA = Module.executeNFA; 
         const getDidAccept = Module.getDidAccept;
-
-        // create an NFA
-        const MyNFA = createNFA("aUb");
+        const getStates = Module.getStates; 
+        const getAcceptStates = Module.getAcceptStates;
+        
+        const MyNFA = createNFA("a*");
         console.log(getDidAccept(MyNFA));     
         executeNFA(MyNFA, "a"); 
         console.log(getDidAccept(MyNFA));     
+        console.log(getStates(MyNFA));
 
+        const statesVec = getAcceptStates(MyNFA);
+        const states = []
+        console.log("size:", statesVec.size());
+        for (let i = 0; i < statesVec.size(); i++) {
+          states.push(statesVec[i]);
+        }
+
+
+        console.log(states);
+        // create an NFA
       };
 
     </script>
-  {# console.log("Here? I dot")
+        {# const MyNFA = createNFA("a&b");
+        console.log(getDidAccept(MyNFA));     
+        executeNFA(MyNFA, "a"); 
+        console.log(getDidAccept(MyNFA));   
+        console.log(MyNFA);  #}
+
+
+    {# console.log("Here? I dot")
         const Point = Module.Point;
         const point = new Point();
         point.x = 3;
