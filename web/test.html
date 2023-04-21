@@ -12,60 +12,43 @@
       // This function will be called when the WebAssembly module is ready
       Module.onRuntimeInitialized = function () {
         
-
-        //declare class NFA
-        //const NFA = Module.NFA;
-        //declare create function
         const createNFA = Module.createNFA;
         const executeNFA = Module.executeNFA; 
         const getDidAccept = Module.getDidAccept;
         const getStates = Module.getStates; 
         const getAcceptStates = Module.getAcceptStates;
-        
-        const MyNFA = createNFA("a*");
+        const getTransitionTable = Module.getTransitionTable;       
+
+        const MyNFA = createNFA("defU(aU(b&c)*)");
         console.log(getDidAccept(MyNFA));     
-        executeNFA(MyNFA, "a"); 
+        executeNFA(MyNFA, "def"); 
         console.log(getDidAccept(MyNFA));     
         console.log(getStates(MyNFA));
 
-        const statesVec = getAcceptStates(MyNFA);
-        const states = []
+        const transitionVec = getTransitionTable(MyNFA);
+        const statesVec = getStates(MyNFA);
+        
+        var transitions = ""
+        var states = ""
+
         console.log("size:", statesVec.size());
         for (let i = 0; i < statesVec.size(); i++) {
-          states.push(statesVec[i]);
+          states += ("q" + statesVec.get(i) + " ");
         }
 
+        for (let i = 0; i < transitionVec.size(); i++) {
+          const tup = transitionVec.get(i);
+          console.log(tup.qi, tup.sigma, tup.qj)
+        }
+        
+        var statesHeader = document.getElementById("states");
+        statesHeader.style.color = "red";
+        statesHeader.textContent = states; 
 
         console.log(states);
-        // create an NFA
       };
 
     </script>
-        {# const MyNFA = createNFA("a&b");
-        console.log(getDidAccept(MyNFA));     
-        executeNFA(MyNFA, "a"); 
-        console.log(getDidAccept(MyNFA));   
-        console.log(MyNFA);  #}
-
-
-    {# console.log("Here? I dot")
-        const Point = Module.Point;
-        const point = new Point();
-        point.x = 3;
-        point.y = 4;
-        console.log(point.x);
-        
-        const ACCEPT = 1;
-        const State = Module.State;
-        const state = new State(Module.StateType.ACCEPT);
-        const state2 = new State(Module.StateType.REJECT);
-          
-        console.log(state);
-        console.log(state.type.value);
-        console.log(state2.type.value); #}
+    <h1 id="states">Here</h1>
   </body>
 </html>
-
-        {# const createNFALeaf= Module.createNFALeafFactory; #}
-        {# const createNFABinaryOp = Module.createNFABinaryOpFactory; #}
-        {# const createNFAUnaryOp = Module.createNFAUnaryOpFactory; #}

@@ -37,8 +37,6 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-
-// NFA FUNCTIONALITY
 std::shared_ptr<NFA> createNFA(const std::string &regex) {
 
     auto regexParser = std::make_shared<Parser>();   
@@ -53,25 +51,22 @@ std::shared_ptr<NFA> createNFA(const std::string &regex) {
     return visitor->nfa;
 }
 
-#ifdef COMPILE_WEB
 void executeNFA(std::shared_ptr<NFA> nfa, const std::string &string) {
     nfa->execute(nfa->startState, string);
 }
 
-// WRAPPERS
 std::vector<uint32_t> getStatesWrapper(std::shared_ptr<NFA> nfa) {
     std::vector<uint32_t> states;
     for (auto state : nfa->states) {
-        states.push_back( (uint32_t) state.get());
+        states.push_back(state->getId());
     }
-    return {1, 2, 3, 4};
-    // return states;
+    return states;
 }
 
 std::vector<uint32_t> getAcceptStatesWrapper(std::shared_ptr<NFA> nfa) {
     std::vector<uint32_t> acceptStates;
     for (auto state : nfa->acceptStates) {
-        acceptStates.push_back( (uint32_t) state.get());
+        acceptStates.push_back(state->getId());
     }
     return acceptStates;
 }
@@ -81,46 +76,64 @@ bool getDidAcceptWrapper(std::shared_ptr<NFA> nfa) {
 }
 
 uint32_t getStartStateWrapper(std::shared_ptr<NFA> nfa) {
-    return (uint32_t) nfa->startState.get();
+    return nfa->startState->getId();
 }
 
-std::vector<std::tuple<int, int, char>> getTransitionTableWrapper(std::shared_ptr<NFA> nfa) { 
+class TupleWrapper {
+    public:
+        TupleWrapper(uint32_t qi, char sigma, uint32_t qj) : qi(qi), sigma(sigma), qj(qj) {}
 
-    std::vector<std::tuple<uint32_t, uint32_t, char>> transition_table;
+        uint32_t get_qi() const { return qi; }
+        void set_qi(uint32_t value) { qi = value; }
 
-    for (auto it = nfa->transition_table.begin(); it != nfa->transition_table.end(); it++) {
-        std::tuple<uint32_t, uint32_t, char> transition_tup;
+        char get_sigma() const { return sigma; }
+        void set_sigma(char value) { sigma = value; }
+
+        uint32_t get_qj() const { return qj; }
+        void set_qj(uint32_t value) { qj = value; }
+
+    private:
+        uint32_t qi;
+        char sigma;
+        uint32_t qj;
+};
+
+std::vector<TupleWrapper> getTransitionTableWrapper(std::shared_ptr<NFA> nfa) { 
+
+    std::vector<TupleWrapper> transition_table;
+
+    for ( TransitionTable::iterator it = nfa->transition_table.begin(); it != nfa->transition_table.end(); it++) {
+        TransitionTuple transition_tuple = *it; 
+
+        uint32_t qi = std::get<0>(*it)->getId();
+        char sigma = std::get<1>(*it);
+        uint32_t qj = std::get<2>(*it)->getId();
+        
+        TupleWrapper tup_wrapper(qi, sigma, qj);
+        transition_table.push_back(tup_wrapper);
     }
+    return transition_table;
 }
 
-
-
+#ifdef COMPILE_WEB
 EMSCRIPTEN_BINDINGS(my_module) {  
     emscripten::class_<NFA>("NFA")
         .smart_ptr<std::shared_ptr<NFA>>("shared_ptr<NFA>");
 
-    emscripten::function("createNFA", &createNFA); 
-    emscripten::function("executeNFA", &executeNFA); 
-    emscripten::function("getDidAccept", &getDidAcceptWrapper); 
-    emscripten::function("getStates", &getStatesWrapper); 
-    emscripten::function("getAcceptStates", &getAcceptStatesWrapper); 
+    emscripten::class_<TupleWrapper>("TupleWrapper")
+        .constructor<uint32_t, char, uint32_t>()
+        .property("qi", &TupleWrapper::get_qi, &TupleWrapper::set_qi)
+        .property("sigma", &TupleWrapper::get_sigma, &TupleWrapper::set_sigma)
+        .property("qj", &TupleWrapper::get_qj, &TupleWrapper::set_qj);
+    
+    emscripten::function("createNFA", &createNFA);
+    emscripten::function("executeNFA", &executeNFA);
+    emscripten::function("getDidAccept", &getDidAcceptWrapper);
+    emscripten::function("getStates", &getStatesWrapper);
+    emscripten::function("getAcceptStates", &getAcceptStatesWrapper);
+    emscripten::function("getTransitionTable", &getTransitionTableWrapper);
 
     emscripten::register_vector<uint32_t>("vector_uin32_t");
-    // emscripten::function("createNFALeafFactory", &createNFALeafFactory); 
-    // emscripten::function("createNFABinaryOpFactory", &createNFABinaryOpFactory); 
-    // emscripten::function("createNFAUnaryOpFactory", &createNFAUnaryOpFactory); 
- 
-    // emscripten::class_<Point>("Point")
-    // .constructor<>()
-    // .property("x", &Point::x)
-    // .property("y", &Point::
-    // emscripten::enum_<StateType>("StateType")
-    //     .value("ACCEPT", StateType::ACCEPT)
-    //     .value("REJECT", StateType::REJECT);
-
-    // emscripten::class_<State>("State")
-    //     .smart_ptr_constructor("State", &std::make_shared<State, StateType>)
-    //     .property("type", &State::type);
+    emscripten::register_vector<TupleWrapper>("vector_tuple_uint_char_unint");
 }
-
 #endif

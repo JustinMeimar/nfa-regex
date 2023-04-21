@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 enum StateType {
     ACCEPT,
@@ -8,9 +9,9 @@ enum StateType {
 class State {
     public: 
         StateType type; //is accept or reject 
-        int id; 
+        uint32_t id; 
         State(StateType type) : type(type) { id = max_id; max_id++; }
-        int getId();
+        uint32_t getId();
     private:
-        static int max_id;
+        static uint32_t max_id;
 };
