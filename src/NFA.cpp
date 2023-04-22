@@ -216,33 +216,32 @@ void NFA::execute(std::shared_ptr<State> start_state, const std::string &string)
     }
     return; 
 }
-
-void NFA::computeComplement() {
-
-    std::shared_ptr<State> new_start_state = std::make_shared<State>(REJECT);
-    this->startState = new_start_state;
-
-    // flip reject states to accept
-    for (auto state : this->states) {
-        if (state->type == REJECT) {
-            state->type = ACCEPT;
-        }
-    }
-
-    // flip accept states to reject
-    for (auto state : this->acceptStates) {
-        state->type = REJECT;
-        addTransition(startState, state, EPSILON);
-    }
-
-    // invert transition rule
-    for (auto transition_tuple : this->transition_table) {
-        std::shared_ptr<State> q1 = std::get<0>(transition_tuple);
-        std::shared_ptr<State> q2 = std::get<2>(transition_tuple);
         
-        std::get<2>(transition_tuple) = q1;
-        std::get<0>(transition_tuple) = q2; 
+json NFA::serializeToJSON() {
+    
+    json nfa; 
+    std::vector<uint32_t> state_ids; 
+    for (auto state : states) {
+        state_ids.push_back(state->getId());
     }
+    nfa["states"] = state_ids;
+
+    std::vector<json> edges;
+    
+    for ( TransitionTable::iterator it = transition_table.begin(); it != transition_table.end(); it++) {
+        // Get key and value
+        json edge;
+        TransitionTuple transition_tuple = *it;
+        edge["qi"] = (uint32_t) std::get<0>(*it)->getId();
+        edge["sigma"] = (char) std::get<1>(*it);
+        edge["qj"] = (uint32_t) std::get<2>(*it)->getId();
+
+        edges.push_back(edge);
+    }
+
+    nfa["edges"] = edges;
+
+    return nfa;
 }
 
 void NFA::printTransitionTable(TransitionTable transition_table) {

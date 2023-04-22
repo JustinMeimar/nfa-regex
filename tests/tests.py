@@ -6,9 +6,7 @@ def run_test(re, string, expected_result):
      
     args = [re, string]
     process = subprocess.run([cmd, *args], stdout=subprocess.PIPE, text=True)
-    grep_process = subprocess.run(["grep", "-q", "Accept"], input=process.stdout, stdout=subprocess.PIPE, text=True)
-
-    if grep_process.returncode == expected_result:
+    if process.returncode == expected_result:
         print(" ===\033[32m" + " PASS" + "\033[0m", "re:", '\033[33m' + re + "\033[0m", "\tstring:" , '\033[33m' + string + "\033[0m")
         return True 
     else:
@@ -25,7 +23,7 @@ def prepare_tests(filename):
             inputs = line.split(" ")
             re = inputs[0]
             string = inputs[1]
-            expected_result = ord(inputs[2]) - ord('0')
+            expected_result = int(ord(inputs[2]) - ord('0'))
             if run_test(re, string, expected_result):
                 pass_count += 1
             count += 1

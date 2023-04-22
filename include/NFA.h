@@ -7,6 +7,7 @@
 #include <tuple>
 #include <algorithm>
 #include <queue>
+#include <nlohmann/json.hpp>
 
 #include "Token.h"
 #include "Node.h"
@@ -23,6 +24,8 @@ typedef std::tuple<std::shared_ptr<State>, const char, std::shared_ptr<State>> T
 typedef std::set<TransitionTuple> TransitionTable;
 typedef std::set<std::shared_ptr<State>> StateSet;
 typedef std::tuple<std::shared_ptr<State>, unsigned int> ExecutionConfig;
+
+using json = nlohmann::json;
 
 class NFA {
     public:
@@ -50,7 +53,7 @@ class NFA {
         bool getAccept() { return accept; } 
 
         //helper 
-        void computeComplement();
+        json serializeToJSON();
         void printTransitionTable(TransitionTable transition_table);
         void printStates();
 
