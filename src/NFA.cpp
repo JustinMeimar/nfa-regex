@@ -217,17 +217,16 @@ void NFA::execute(std::shared_ptr<State> start_state, const std::string &string)
     return; 
 }
         
-json NFA::serializeToJSON() {
-    
+json NFA::serializeToJSON() { 
     json nfa; 
+    // create states field 
     std::vector<uint32_t> state_ids; 
     for (auto state : states) {
         state_ids.push_back(state->getId());
     }
     nfa["states"] = state_ids;
-
-    std::vector<json> edges;
-    
+    // create edges field
+    std::vector<json> edges; 
     for ( TransitionTable::iterator it = transition_table.begin(); it != transition_table.end(); it++) {
         // Get key and value
         json edge;
@@ -238,7 +237,6 @@ json NFA::serializeToJSON() {
 
         edges.push_back(edge);
     }
-
     nfa["edges"] = edges;
 
     return nfa;
