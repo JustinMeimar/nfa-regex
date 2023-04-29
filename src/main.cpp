@@ -10,8 +10,6 @@
     #include <emscripten/bind.h> 
 #endif
 
-
-
 void process_args(std::vector<std::string> args, bool& emitJsonToPipe, bool& emitJsonToStdout) {
     for (size_t i = 0; i< args.size(); i++) {
         if (args[i] == "--emit-json-pipe" || args[i] == "-e") {
