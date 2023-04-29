@@ -6,31 +6,36 @@
 #include "NFA.h"
 #include "Visitor.h"
 #include "Bindings.h"
-#ifdef COMPILE_WEB 
+#ifdef COMPILE_WASM 
     #include <emscripten/bind.h> 
 #endif
+
+
+
+void process_args(std::vector<std::string> args, bool& emitJsonToPipe, bool& emitJsonToStdout) {
+    for (size_t i = 0; i< args.size(); i++) {
+        if (args[i] == "--emit-json-pipe" || args[i] == "-e") {
+            emitJsonToPipe = true; 
+        }
+        if (args[i] == "--emit-json-stdout") {
+            emitJsonToStdout = true;
+        }
+    }
+}
 
 int main(int argc, char** argv) {
 
     std::string regex;
     std::string string;
-    bool emitJson = false;
+    bool emitJsonToPipe = false;
+    bool emitJsonToStdout = false;
+
     std::vector<std::string> args(argv +1, argv+argc);
 
-    for (size_t i = 0; i< args.size(); i++) {
-        if (args[i] == "--emit-json" || args[i] == "-e") {
-            emitJson = true; 
-        }
-    }
-
-    if (argc < 3) {
-        std::cout << "insufficient args" << std::endl;
-        exit(0);
-    } else {
-        regex = argv[1]; //regex specification
-        string = argv[2]; //string to run on RE 
-    } 
- 
+    regex = argv[1]; //regex specification
+    string = argv[2]; //string to run on RE  
+    process_args(args, emitJsonToPipe, emitJsonToStdout);    
+    
     auto regexParser = std::make_shared<Parser>();   
     regexParser->readStream(regex);
     regexParser->insertImplicitConcatTokens();
@@ -41,8 +46,12 @@ int main(int argc, char** argv) {
     visitor->visit(root);
     std::shared_ptr<NFA> nfa = visitor->nfa;
 
-    if (emitJson) {
-        writeNFAToNamedPipe(nfa);
+    std::string str(string);
+    if (emitJsonToPipe) {
+        writeNFAToNamedPipe(nfa, str);
+    }
+    if (emitJsonToStdout) {
+        writeNFAToStdout(nfa, str);
     }
 
     nfa->execute(nfa->startState, string); 
@@ -53,8 +62,8 @@ int main(int argc, char** argv) {
     }     
 }
 
-/*WASM bindings compiled with -DCOMPILE_WEB=1*/
-#ifdef COMPILE_WEB
+/*WASM bindings compiled with -COMPILE_WASM=1*/
+#ifdef COMPILE_WASM
 EMSCRIPTEN_BINDINGS(my_module) {  
     emscripten::class_<NFA>("NFA")
         .smart_ptr<std::shared_ptr<NFA>>("shared_ptr<NFA>");

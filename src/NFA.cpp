@@ -217,7 +217,7 @@ void NFA::execute(std::shared_ptr<State> start_state, const std::string &string)
     return; 
 }
         
-json NFA::serializeToJSON() { 
+json NFA::serializeToJSON(const std::string& string) { 
     json nfa; 
     // create states field 
     std::vector<uint32_t> state_ids; 
@@ -238,6 +238,14 @@ json NFA::serializeToJSON() {
         edges.push_back(edge);
     }
     nfa["edges"] = edges;
+    //add string and accept fields
+    execute(startState, string);
+    nfa["string"] = string.c_str();
+    if (accept) {
+       nfa["accept"] = "true";
+    } else {
+       nfa["accept"] = "false";
+    }
 
     return nfa;
 }

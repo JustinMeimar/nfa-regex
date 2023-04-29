@@ -53,7 +53,7 @@ class NFA {
         bool getAccept() { return accept; } 
 
         //helper 
-        json serializeToJSON();
+        json serializeToJSON(const std::string& string);
         void printTransitionTable(TransitionTable transition_table);
         void printStates();
 
