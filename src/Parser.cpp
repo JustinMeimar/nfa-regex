@@ -44,7 +44,7 @@ void Parser::match(Type type) {
     if (nextToken->type == type) {
         advance(); 
     } else {
-        printf("unexpected type recieved: %d, expected: %d", type, nextToken->type); 
+        std::cerr << "parsing error" << std::endl;
         exit(1);
     }
 }

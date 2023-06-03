@@ -71,6 +71,7 @@ void NFA::constructFromUnion(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs)
     std::shared_ptr<State> new_start_state = std::make_shared<State>(REJECT);
     this->startState = new_start_state;
     this->states = unionStates(lhs->states, rhs->states);
+    this->states.insert(new_start_state);
     this->acceptStates = unionStates(lhs->acceptStates, rhs->acceptStates);
 
     copyTransitions(&lhs->transition_table, &transition_table); 
@@ -91,6 +92,8 @@ void NFA::constructFromConcat(std::shared_ptr<NFA> lhs, std::shared_ptr<NFA> rhs
     std::shared_ptr<State> newAcceptState = std::make_shared<State>(ACCEPT);    
     this->startState = newStartState;
     this->states = unionStates(lhs->states, rhs->states);
+    this->states.insert(newStartState);
+    this->states.insert(newAcceptState);
     this->acceptStates.insert({newAcceptState});   
 
     // Add transition from the new Start state to the LHS Start state
@@ -123,6 +126,8 @@ void NFA::constructFromStar(std::shared_ptr<NFA> nfa) {
     std::shared_ptr<State> newAcceptState = std::make_shared<State>(ACCEPT);
     this->startState = newStartState;
     this->states = nfa->states;
+    this->states.insert(newStartState);
+    this->states.insert(newAcceptState);
     this->acceptStates = {newAcceptState};
 
     copyTransitions(&nfa->transition_table, &this->transition_table);
@@ -216,16 +221,34 @@ void NFA::execute(std::shared_ptr<State> start_state, const std::string &string)
     }
     return; 
 }
-        
+
+/*
+setStates(data.states);
+setEdges(data.edges);
+setStartState(data.startState);
+setAcceptStates(data.acceptStates);
+*/ 
 json NFA::serializeToJSON(const std::string& string) { 
     json nfa; 
-    // create states field 
+
+    // STATES 
     std::vector<uint32_t> state_ids; 
     for (auto state : states) {
         state_ids.push_back(state->getId());
     }
     nfa["states"] = state_ids;
-    // create edges field
+
+    // ACCEPT STATES 
+    std::vector<uint32_t> accept_state_ids; 
+    for (auto state : acceptStates) {
+         accept_state_ids.push_back(state->getId());
+    }
+    nfa["acceptStates"] = accept_state_ids;
+
+    // START STATE
+    nfa["startState"] = this->startState->getId();
+
+    // EDGES
     std::vector<json> edges; 
     for ( TransitionTable::iterator it = transition_table.begin(); it != transition_table.end(); it++) {
         // Get key and value
