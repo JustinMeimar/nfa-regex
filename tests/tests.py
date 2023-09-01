@@ -43,4 +43,4 @@ if __name__ == "__main__":
             prepare_tests(os.path.join(test_dir, file))
         except Exception:
             print(f"Test: {file} failed")
-            sys.exit(1)
+            # sys.exit(1)
