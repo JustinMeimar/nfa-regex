@@ -1,0 +1,39 @@
+name: CMake Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Setup CMake
+      uses: jwlawson/actions-setup-cmake@v1.8
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+      
+    - name: Create Build Directory
+      run: mkdir build
+
+    - name: CMake Configure
+      run: |
+        cd build
+        cmake ..
+        
+    - name: CMake Build
+      run: |
+        cd build
+        cmake --build .
+
+    - name: Run Python Tests
+      run: python your_test_script.py

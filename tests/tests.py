@@ -1,4 +1,5 @@
 import subprocess 
+import sys
 
 cmd = "../bin/regex"
 
@@ -29,6 +30,11 @@ def prepare_tests(filename):
             count += 1
      
     print("PASSED:", pass_count, "/", count)
+
+    if pass_count == count:
+        sys.exit(0)
+    else:
+        sys.exit(1)
     
 if __name__ == "__main__": 
     prepare_tests("keys/paren.txt")
