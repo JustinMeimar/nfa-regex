@@ -1,5 +1,6 @@
 import subprocess 
 import sys
+import os
 
 cmd = "../bin/regex"
 
@@ -30,13 +31,16 @@ def prepare_tests(filename):
             count += 1
      
     print("PASSED:", pass_count, "/", count)
-
-    if pass_count == count:
-        sys.exit(0)
-    else:
-        sys.exit(1)
+    if pass_count != count:
+        raise Exception 
+    return 
     
 if __name__ == "__main__": 
-    prepare_tests("keys/paren.txt")
-    prepare_tests("keys/union-concat.txt")
-    prepare_tests("keys/star.txt")
+
+    test_dir = os.path.join(os.path.dirname(__file__), "keys") 
+    for file in os.listdir(test_dir):
+        try:  
+            prepare_tests(os.path.join(test_dir, file))
+        except Exception:
+            print(f"Test: {file} failed")
+            sys.exit(1)
