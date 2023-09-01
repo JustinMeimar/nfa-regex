@@ -1,5 +1,7 @@
 # NFA-Regex
 
+![alt text](doc/project.png)
+
 ### Goal
 All regular expressions can be converted to a non-deterministic finite automata (NFA). The
 goal is of this project is to take in some regular expression and generate a NFA to run
@@ -59,8 +61,6 @@ EMPTY_SET = '\0';
 - execute strings on NFA
 - Union closure
 - Concatenation closure
+- Star closure
 - Automated testcases
-
-### Todo
-- Compile to WASM for webiste? Or use binary method like before
-- Set up command line interface to be user friendly, intuitive and with more options 
+- Web GUI on website
