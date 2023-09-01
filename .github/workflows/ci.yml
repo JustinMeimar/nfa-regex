@@ -39,4 +39,4 @@ jobs:
         cmake --build .
 
     - name: Run Python Tests
-      run: python your_test_script.py
+      run: python tests/tests.py
